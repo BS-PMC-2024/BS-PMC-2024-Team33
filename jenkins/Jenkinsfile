@@ -14,20 +14,65 @@ pipeline {
                 sh 'pip install django-crispy-forms'
             }
         }
-       /* stage('Test') {
-            agent {
-                docker {
-                    image 'qnib/pytest'
-                }
-            }
+
+    }
+}
+pipeline {
+    agent {docker {
+                    image 'python:3.12.4-alpine3.20'}
+
+    environment {
+        VENV_DIR = '.venv'
+    }
+
+    stages {
+        stage('Checkout') {
             steps {
-                //sh 'py.test --verbose --junit-xml test-reports/results.xml sources/test_calc.py'
+                // Checkout the source code from the repository
+                git branch: 'main', url: 'https://github.com/BS-PMC-2024/BS-PMC-2024-Team33.git'
             }
-            post {
-                always {
-                    junit 'test-reports/results.xml'
+        }
+
+        stage('Setup Python Environment') {
+            steps {
+                script {
+                    // Create and activate a virtual environment
+                    sh 'python3 -m venv $VENV_DIR'
+                    // Install dependencies from requirements.txt
+                    sh '''
+                        source $VENV_DIR/bin/activate
+                        pip install --upgrade pip
+                        pip install -r requirements.txt
+                    '''
                 }
             }
-        }*/
+        }
+
+        stage('Run Tests') {
+            steps {
+                script {
+                    // Run Django tests
+                    sh '''
+                        source $VENV_DIR/bin/activate
+                        python manage.py test
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // Clean up the workspace after the build
+            cleanWs()
+        }
+        success {
+            // Actions to take on successful build
+            echo 'Build completed successfully.'
+        }
+        failure {
+            // Actions to take on failed build
+            echo 'Build failed.'
+        }
     }
 }
