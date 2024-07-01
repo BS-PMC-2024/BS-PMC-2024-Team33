@@ -1,8 +1,11 @@
 pipeline {
-    agent {docker {
-                    image 'python:3.12.4-alpine3.20'}
-
+    agent {
+            docker {
+                    image 'python:3.12.4-alpine3.20'
+                    }
+            }
     environment {
+        // Define any environment variables you need here
         VENV_DIR = '.venv'
     }
 
@@ -10,7 +13,10 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Checkout the source code from the repository
-                git branch: 'main', url: 'https://github.com/BS-PMC-2024/BS-PMC-2024-Team33.git'
+                git(
+                    branch: 'main',
+                    url: 'https://github.com/BS-PMC-2024/BS-PMC-2024-Team33.git'
+                )
             }
         }
 
