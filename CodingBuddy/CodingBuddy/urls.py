@@ -24,4 +24,6 @@ urlpatterns = [
     path("", TemplateView.as_view(template_name="home.html"), name="home"),
     path('', include('CBapp.urls')),
     path('admin/', admin.site.urls),
+    path('developer/', include('CBapp.urls', namespace='developer')),
+
 ]
