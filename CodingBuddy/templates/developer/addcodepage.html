@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Code Problem</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .form-wrapper {
+            margin-bottom: 20px;
+        }
+        .form-wrapper h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        form {
+            max-width: 600px;
+            margin: auto;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+        }
+        form input[type="text"],
+        form textarea {
+            width: calc(100% - 40px);
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        form button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        form button:hover {
+            background-color: #45a049;
+        }
+        .back-button {
+            background-color: #ccc;
+            color: #333;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .back-button:hover {
+            background-color: #bbb;
+        }
+        .update-box {
+            background-color: #f0f0f0;
+            padding: 15px;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+        }
+        .update-box h3 {
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .update-box p {
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-wrapper">
+            <h1>Add New Code Problem</h1>
+            <form method="post" action="{% url 'developer:add_code_problem' %}">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">Add</button>
+            </form>
+        </div>
+        <a href="/" class="back-button">Back</a>
+    </div>
+</body>
+</html>
