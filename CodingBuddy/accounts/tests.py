@@ -10,8 +10,8 @@ class SignupTest(TestCase):
         response = self.client.post('/accounts/signup/', {
             'username': 'teststudent',
             'email': 'teststudent@example.com',
-            'password1': 'password123',
-            'password2': 'password123',
+            'password1': 'tesaosdjas231',
+            'password2': 'tesaosdjas231',
             'role': 'student'
         })
         self.assertEqual(response.status_code, 302)  # Redirect after successful signup

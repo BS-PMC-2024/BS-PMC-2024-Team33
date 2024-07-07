@@ -1,13 +1,13 @@
 pipeline {
     agent {
         docker {
-            image 'python:3.12' // Specify the Docker image with Python installed
+            image '3.12-alpine3.20' // Specify the Docker image with Python installed
             args '-u root:root' // Run as root to avoid permission issues
         }
     }
 
     environment {
-        VIRTUAL_ENV = "${env.WORKSPACE}/venv"
+        VIRTUAL_ENV = "${env.WORKSPACE}/CodingBuddy/venv"
         PATH = "${env.VIRTUAL_ENV}/bin:${env.PATH}"
     }
 
@@ -20,6 +20,8 @@ pipeline {
         stage('Set up Python') {
             steps {
                 sh '''
+                    #!/bin/bash
+                    cd CodingBuddy
                     python -m venv venv
                     source venv/bin/activate
                     pip install -r requirements.txt
@@ -29,6 +31,8 @@ pipeline {
         stage('Run Migrations') {
             steps {
                 sh '''
+                    #!/bin/bash
+                    cd CodingBuddy
                     source venv/bin/activate
                     python manage.py migrate
                 '''
@@ -37,6 +41,8 @@ pipeline {
         stage('Run Tests') {
             steps {
                 sh '''
+                    #!/bin/bash
+                    cd CodingBuddy
                     source venv/bin/activate
                     python manage.py test
                 '''
@@ -46,8 +52,8 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: '**/db.sqlite3', fingerprint: true
-            junit 'reports/*.xml'
+            archiveArtifacts artifacts: '**/CodingBuddy/db.sqlite3', fingerprint: true
+            junit 'CodingBuddy/reports/*.xml'
         }
     }
 }
