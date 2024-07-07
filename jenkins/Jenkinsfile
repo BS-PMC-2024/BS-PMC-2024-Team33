@@ -44,7 +44,7 @@ pipeline {
                     #!/bin/bash
                     cd CodingBuddy
                     . venv/bin/activate
-                    python manage.py test
+                    pytest --junitxml=reports/test-results.xml
                 '''
             }
         }
@@ -53,7 +53,7 @@ pipeline {
     post {
         always {
             archiveArtifacts artifacts: '**/CodingBuddy/db.sqlite3', fingerprint: true
-            junit 'CodingBuddy/reports/*.xml'
+            junit 'CodingBuddy/reports/test-results.xml'
         }
     }
 }
