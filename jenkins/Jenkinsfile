@@ -1,7 +1,7 @@
 pipeline {
     agent {
         docker {
-            image '3.12-alpine3.20' // Specify the Docker image with Python installed
+            image 'python' // Specify the Docker image with Python installed
             args '-u root:root' // Run as root to avoid permission issues
         }
     }
@@ -23,7 +23,7 @@ pipeline {
                     #!/bin/bash
                     cd CodingBuddy
                     python -m venv venv
-                    source venv/bin/activate
+                    . venv/bin/activate
                     pip install -r requirements.txt
                 '''
             }
@@ -33,7 +33,7 @@ pipeline {
                 sh '''
                     #!/bin/bash
                     cd CodingBuddy
-                    source venv/bin/activate
+                    . venv/bin/activate
                     python manage.py migrate
                 '''
             }
@@ -43,7 +43,7 @@ pipeline {
                 sh '''
                     #!/bin/bash
                     cd CodingBuddy
-                    source venv/bin/activate
+                    . venv/bin/activate
                     python manage.py test
                 '''
             }
