@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from .forms import CodeProblemForm
+from .forms import ProblemFilterForm
 from .models import CodeProblem
 from django.http import JsonResponse
 
@@ -49,3 +50,14 @@ def edit_solution(request, problem_id):
         form = CodeProblemForm(instance=problem)
 
     return render(request, 'developer/edit_solution.html', {'form': form, 'problem': problem})
+
+def ViewProblmesForStudent(request):
+    accepted_problems = CodeProblem.objects.filter(status='accepted')
+    form = ProblemFilterForm(request.GET or None)
+
+    if form.is_valid():
+        language = form.cleaned_data.get('language')
+        if language:
+            accepted_problems = accepted_problems.filter(language=language)
+
+    return render(request, 'student/Showing_Problems.html', {'accepted_problems': accepted_problems, 'form': form})

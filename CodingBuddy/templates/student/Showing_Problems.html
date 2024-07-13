@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Accepted Code Problems</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .problem {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background: #fafafa;
+        }
+
+        .problem h3 {
+            margin-top: 0;
+            color: #007bff;
+        }
+
+        .problem p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Accepted Code Problems</h1>
+        <form method="get">
+            <label for="language">Filter by Language:</label>
+            <input type="text" id="language" name="language" value="{{ form.language.value }}">
+            <button type="submit">Filter</button>
+        </form>
+        {% if accepted_problems %}
+            {% for problem in accepted_problems %}
+                <div class="problem">
+                    <h3>{{ problem.title }}</h3>
+                    <p><strong>Description:</strong></p>
+                    {% for paragraph in problem.description.splitlines %}
+                        <p>{{ paragraph }}</p>
+                    {% endfor %}
+                    <p><strong>Solution:</strong></p>
+                    {% for paragraph in problem.solution.splitlines %}
+                        <p>{{ paragraph }}</p>
+                    {% endfor %}
+                    <p><strong>Language:</strong> {{ problem.language }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No accepted problems found.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
