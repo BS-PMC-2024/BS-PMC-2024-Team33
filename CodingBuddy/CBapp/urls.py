@@ -1,8 +1,9 @@
 from django.urls import path
 from . import views
 from .controller import tutorials_views
-app_name = 'CBapp'
+from .controller import approveCB_views
 
+app_name = 'CBapp'
 
 urlpatterns = [
     path('homepage/', views.homepage, name='homepage'),
@@ -15,4 +16,6 @@ urlpatterns = [
     path('developer/tutorials/', tutorials_views.tutorial_list_developer, name='tutorial_list_developer'),
     path('developer/tutorials/add/', tutorials_views.add_tutorial, name='add_tutorial'),
     path('developer/tutorials/edit/<int:tutorial_id>/', tutorials_views.edit_tutorial, name='edit_tutorial'),
+    path('admin/CBstatus/', approveCB_views.admin_problem_list, name='CBstatus'),
+    path('admin/problems/<int:problem_id>/update/', approveCB_views.admin_update_problem, name='admin_update_problem')
    ]

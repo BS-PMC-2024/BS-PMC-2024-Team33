@@ -1,0 +1,38 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<h2>Unapproved Code Problems</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Problem</th>
+            <th>Description</th>
+            <th>Solution</th>
+            <th>Language</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for problem in problems %}
+            <tr>
+                <td>{{ problem.problem }}</td>
+                <td>{{ problem.description }}</td>
+                <td>{{ problem.solution }}</td>
+                <td>{{ problem.language }}</td>
+                <td>{{ problem.status }}</td>
+                <td>
+                    <form method="POST" action="{% url 'CBapp:admin_update_problem' problem.id %}">
+                        {% csrf_token %}
+                        <select name="status">
+                            <option value="accepted" {% if problem.status == 'accepted' %}selected{% endif %}>Accepted</option>
+                            <option value="rejected" {% if problem.status == 'rejected' %}selected{% endif %}>Reject</option>
+                        </select>
+                        <button type="submit">Update</button>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
