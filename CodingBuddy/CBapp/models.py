@@ -10,3 +10,21 @@ class CodeProblem(models.Model):
 
     def __str__(self):
         return self.problem
+
+class Tutorial(models.Model):
+    LANGUAGE_CHOICES = [
+        ('c', 'C'),
+        ('python', 'Python'),
+        ('java', 'Java'),
+        # Add more choices as needed
+    ]
+
+    youtube_link = models.URLField(blank=True, null=True)
+    medium_link = models.URLField(blank=True, null=True)
+    wikipedia_link = models.URLField(blank=True, null=True)
+    language = models.CharField(max_length=20, choices=LANGUAGE_CHOICES)
+
+    def __str__(self):
+        return f"Tutorial ({self.language})"
+
+
