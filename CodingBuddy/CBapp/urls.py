@@ -1,7 +1,6 @@
 from django.urls import path
 from . import views
-
-
+from .controller import tutorials_views
 app_name = 'CBapp'
 
 
@@ -13,7 +12,6 @@ urlpatterns = [
     path('edit_solution/<int:problem_id>/', views.edit_solution, name='edit_solution'),
     path('delete_problem/<int:problem_id>/', views.delete_problem, name='delete_problem'),
     path('student_problem', views.ViewProblmesForStudent, name='student_problem'),
+    path('developer/tutorials/', tutorials_views.tutorial_list_developer, name='tutorial_list_developer'),
+   ]
 
-
-    # Add more paths as needed for your CBapp views
-]
