@@ -14,3 +14,8 @@ class TutorialDeveloperForm(forms.ModelForm):
     class Meta:
         model = Tutorial
         fields = ['youtube_link', 'medium_link', 'wikipedia_link', 'language']
+
+class AdminCodeProblemForm(forms.ModelForm):
+    class Meta:
+        model = CodeProblem
+        fields = ['status']
