@@ -14,4 +14,5 @@ urlpatterns = [
     path('student_problem', views.ViewProblmesForStudent, name='student_problem'),
     path('developer/tutorials/', tutorials_views.tutorial_list_developer, name='tutorial_list_developer'),
     path('developer/tutorials/add/', tutorials_views.add_tutorial, name='add_tutorial'),
+    path('developer/tutorials/edit/<int:tutorial_id>/', tutorials_views.edit_tutorial, name='edit_tutorial'),
    ]
