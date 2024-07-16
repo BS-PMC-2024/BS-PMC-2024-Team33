@@ -1,13 +1,18 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block title %}Home | CodingBuddy{% endblock %}
 
 {% block content %}
+<div class="text-center">
+      <h1 class="display-4">Welcome To CodingBuddy!</h1>
+    <img src="{% static 'home/images/homepageMainPic.jpg' %}" alt="Coding Collaboration" class="img-fluid" style="max-width: 40%; height: auto; margin-top: 20px;">
+</div>
+
 <div class="jumbotron">
-    <h1 class="display-4">Welcome To CodingBuddy!</h1>
+
     <p class="lead">This is a simple, modern platform to practice coding, view multiple solutions, and receive AI-generated feedback.</p>
     <hr class="my-4">
     <p>Get started by solving problems and learning through interactive tutorials.</p>
-    <a class="btn btn-primary btn-lg" href="{% url 'developer:homepage' %}" role="button">Go to developer Homepage</a>
+    <a class="btn btn-primary btn-lg" href="/codepage" role="button">View our coding problems!</a>
 </div>
 {% endblock %}

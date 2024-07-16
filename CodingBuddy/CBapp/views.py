@@ -4,6 +4,8 @@ from .forms import CodeProblemForm
 from .forms import ProblemFilterForm
 from .models import CodeProblem
 from django.http import JsonResponse
+import markdown
+from django.utils.safestring import mark_safe
 
 # Assuming `code_problems` is a global variable for simplicity
 code_problems = []
@@ -34,9 +36,34 @@ def add_code_problem(request):
         form = CodeProblemForm()
 
     return render(request, 'developer/addcodepage.html', {'form': form})
+# In your views.py
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+
+@login_required
 def codepage(request):
+    user = request.user
+    is_developer = user.groups.filter(name='Developer').exists()
+    is_student = user.groups.filter(name='Student').exists()
+
     code_problems = CodeProblem.objects.all()
-    return render(request, 'developer/codepage.html', {'code_problems': code_problems})
+    accepted_problems = CodeProblem.objects.filter(status='accepted')
+
+    for problem in code_problems:
+        problem.description = mark_safe(markdown.markdown(problem.description, extensions=['fenced_code']))
+        problem.solution = mark_safe(markdown.markdown(problem.solution, extensions=['fenced_code']))
+
+    for problem in accepted_problems:
+        problem.description = mark_safe(markdown.markdown(problem.description, extensions=['fenced_code']))
+        problem.solution = mark_safe(markdown.markdown(problem.solution, extensions=['fenced_code']))
+
+    context = {
+        'is_developer': is_developer,
+        'is_student': is_student,
+        'code_problems': code_problems,
+        'accepted_problems': accepted_problems,
+    }
+    return render(request, 'developer/codepage.html', context)
 def edit_solution(request, problem_id):
     problem = get_object_or_404(CodeProblem, pk=problem_id)
 
