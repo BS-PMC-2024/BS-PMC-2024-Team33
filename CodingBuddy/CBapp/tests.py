@@ -12,7 +12,14 @@ django.setup()
 
 from django.test import TestCase, Client
 from django.urls import reverse
-from CBapp.models import CodeProblem  # Corrected import path
+#from CBapp.models import CodeProblem  # Corrected import path
+from django.test import TestCase, Client
+from django.urls import reverse
+from .models import CodeProblem
+from .controller import approveCB_views
+from .forms import AdminCodeProblemForm
+from .models import Tutorial
+from .forms import TutorialDeveloperForm
 
 class ViewProblemsForStudentTest(TestCase):
 
@@ -69,3 +76,65 @@ class ViewProblemsForStudentTest(TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class AdminProblemListViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse('CBapp:CBstatus')
+        # Create some test CodeProblem objects
+        self.problem1 = CodeProblem.objects.create(
+            problem="Test Problem 1",
+            description="Test Description 1",
+            solution="Test Solution 1",
+            status="not accepted",
+            language="Python"
+        )
+        self.problem2 = CodeProblem.objects.create(
+            problem="Test Problem 2",
+            description="Test Description 2",
+            solution="Test Solution 2",
+            status="not accepted",
+            language="Java"
+        )
+
+    def test_admin_problem_list_view(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'admin/CBstatus.html')
+        self.assertIn('problems', response.context)
+        self.assertEqual(len(response.context['problems']), 2)
+        self.assertContains(response, self.problem1.problem)
+        self.assertContains(response, self.problem2.problem)
+
+class TutorialListViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.url = reverse('CBapp:tutorial_list_developer')
+        self.tutorial1 = Tutorial.objects.create(
+            youtube_link='https://youtube.com/example1',
+            medium_link='https://medium.com/example1',
+            wikipedia_link='https://wikipedia.org/example1',
+            language='python'
+        )
+        self.tutorial2 = Tutorial.objects.create(
+            youtube_link='https://youtube.com/example2',
+            medium_link='https://medium.com/example2',
+            wikipedia_link='https://wikipedia.org/example2',
+            language='java'
+        )
+
+    def test_tutorial_list_view(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'developer/tutorial_list.html')
+        self.assertIn('tutorials', response.context)
+        self.assertEqual(len(response.context['tutorials']), 2)
+        self.assertContains(response, self.tutorial1.youtube_link)
+        self.assertContains(response, self.tutorial2.youtube_link)
+
+    def tearDown(self):
+        Tutorial.objects.all().delete()
+
+
+
