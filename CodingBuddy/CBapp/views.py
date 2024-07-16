@@ -34,9 +34,27 @@ def add_code_problem(request):
         form = CodeProblemForm()
 
     return render(request, 'developer/addcodepage.html', {'form': form})
+# In your views.py
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+
+@login_required
 def codepage(request):
-    code_problems = CodeProblem.objects.all()
-    return render(request, 'developer/codepage.html', {'code_problems': code_problems})
+    user = request.user
+    is_developer = user.groups.filter(name='Developer').exists()
+    is_student = user.groups.filter(name='Student').exists()
+
+    code_problems = CodeProblem.objects.all()  # Fetch your code problems here
+    accepted_problems = CodeProblem.objects.filter(status='accepted')  # Example query for accepted problems
+
+    context = {
+        'is_developer': is_developer,
+        'is_student': is_student,
+        'code_problems': code_problems,
+        'accepted_problems': accepted_problems,
+    }
+    return render(request, 'developer/codepage.html', context)
+
 def edit_solution(request, problem_id):
     problem = get_object_or_404(CodeProblem, pk=problem_id)
 
