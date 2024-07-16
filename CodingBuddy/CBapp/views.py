@@ -45,6 +45,8 @@ def codepage(request):
     user = request.user
     is_developer = user.groups.filter(name='Developer').exists()
     is_student = user.groups.filter(name='Student').exists()
+    is_staff = user.is_staff
+
 
     form = ProblemFilterForm(request.GET or None)
     code_problems = CodeProblem.objects.all()
@@ -70,6 +72,7 @@ def codepage(request):
         'code_problems': code_problems,
         'accepted_problems': accepted_problems,
         'form': form,
+        'is_staff': is_staff,
     }
     return render(request, 'developer/codepage.html', context)
 def edit_solution(request, problem_id):
