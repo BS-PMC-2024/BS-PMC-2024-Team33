@@ -133,8 +133,10 @@ class TutorialListViewTest(TestCase):
         self.assertContains(response, self.tutorial1.youtube_link)
         self.assertContains(response, self.tutorial2.youtube_link)
 
+
     def tearDown(self):
         Tutorial.objects.all().delete()
+
 
 
 
