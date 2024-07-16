@@ -46,8 +46,15 @@ def codepage(request):
     is_developer = user.groups.filter(name='Developer').exists()
     is_student = user.groups.filter(name='Student').exists()
 
+    form = ProblemFilterForm(request.GET or None)
     code_problems = CodeProblem.objects.all()
     accepted_problems = CodeProblem.objects.filter(status='accepted')
+
+    if form.is_valid():
+        language = form.cleaned_data.get('language')
+        if language:
+            code_problems = code_problems.filter(language__icontains=language)
+            accepted_problems = accepted_problems.filter(language__icontains=language)
 
     for problem in code_problems:
         problem.description = mark_safe(markdown.markdown(problem.description, extensions=['fenced_code']))
@@ -62,6 +69,7 @@ def codepage(request):
         'is_student': is_student,
         'code_problems': code_problems,
         'accepted_problems': accepted_problems,
+        'form': form,
     }
     return render(request, 'developer/codepage.html', context)
 def edit_solution(request, problem_id):
