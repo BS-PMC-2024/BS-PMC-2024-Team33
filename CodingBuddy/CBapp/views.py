@@ -4,6 +4,8 @@ from .forms import CodeProblemForm
 from .forms import ProblemFilterForm
 from .models import CodeProblem
 from django.http import JsonResponse
+import markdown
+from django.utils.safestring import mark_safe
 
 # Assuming `code_problems` is a global variable for simplicity
 code_problems = []
@@ -44,8 +46,16 @@ def codepage(request):
     is_developer = user.groups.filter(name='Developer').exists()
     is_student = user.groups.filter(name='Student').exists()
 
-    code_problems = CodeProblem.objects.all()  # Fetch your code problems here
-    accepted_problems = CodeProblem.objects.filter(status='accepted')  # Example query for accepted problems
+    code_problems = CodeProblem.objects.all()
+    accepted_problems = CodeProblem.objects.filter(status='accepted')
+
+    for problem in code_problems:
+        problem.description = mark_safe(markdown.markdown(problem.description, extensions=['fenced_code']))
+        problem.solution = mark_safe(markdown.markdown(problem.solution, extensions=['fenced_code']))
+
+    for problem in accepted_problems:
+        problem.description = mark_safe(markdown.markdown(problem.description, extensions=['fenced_code']))
+        problem.solution = mark_safe(markdown.markdown(problem.solution, extensions=['fenced_code']))
 
     context = {
         'is_developer': is_developer,
@@ -54,7 +64,6 @@ def codepage(request):
         'accepted_problems': accepted_problems,
     }
     return render(request, 'developer/codepage.html', context)
-
 def edit_solution(request, problem_id):
     problem = get_object_or_404(CodeProblem, pk=problem_id)
 
