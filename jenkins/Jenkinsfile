@@ -55,7 +55,7 @@ pipeline {
         always {
             archiveArtifacts artifacts: '**/CodingBuddy/db.sqlite3', fingerprint: true
             junit 'CodingBuddy/reports/test-results.xml'
-            publishCoverage adapters: [coberturaAdapter('CodingBuddy/coverage.xml')]
+            publishCoverage adapters: [jacocoAdapteraAdapter('CodingBuddy/coverage.xml')]
             cleanWs()
         }
     }
