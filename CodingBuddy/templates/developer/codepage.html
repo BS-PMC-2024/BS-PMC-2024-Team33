@@ -134,70 +134,108 @@
         {% endif %}
         <button onclick="location.href='/'" class="back-button">Back</button>
     {% elif is_student %}
-        <html>
+   <!DOCTYPE html>
+<html lang="en">
+
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accepted Code Problems</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
             background-color: #f4f4f4;
         }
 
         .container {
-            width: 80%;
-            margin: auto;
-            background: #fff;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
         }
 
-        .problem {
+        .card {
             margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            background: #fafafa;
         }
 
-        .problem h3 {
-            margin-top: 0;
+        .card-title {
             color: #007bff;
         }
 
-        .problem p {
-            margin: 5px 0;
+        .card-text {
+            max-height: 100px;
+            overflow: hidden;
+        }
+
+        .show-more {
+            cursor: pointer;
+            color: #007bff;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .show-more:hover {
+            color: #0056b3;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
-        <h1>Accepted Code Problems</h1>
-        <form method="get">
-            <label for="language">Filter by Language:</label>
-            <input type="text" id="language" name="language" value="{{ form.language.value }}">
-            <button type="submit">Filter</button>
+        <h1 class="mb-4">Code Problems</h1>
+        <form method="get" class="mb-4">
+            <div class="form-group">
+                <label for="language">Filter by Language:</label>
+                <input type="text" id="language" name="language" value="{{ form.language.value }}" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary">Filter</button>
         </form>
-        {% if accepted_problems %}
-            {% for problem in accepted_problems %}
-                <div class="problem">
-                    <h3>{{ problem.title }}</h3>
-                    <p><strong>Description:</strong></p>
-                    {% for paragraph in problem.description.splitlines %}
-                        <p>{{ paragraph }}</p>
-                    {% endfor %}
-                    <p><strong>Solution:</strong></p>
-                    {% for paragraph in problem.solution.splitlines %}
-                        <p>{{ paragraph }}</p>
-                    {% endfor %}
-                    <p><strong>Language:</strong> {{ problem.language }}</p>
-                </div>
-            {% endfor %}
-        {% else %}
-            <p>No accepted problems found.</p>
-        {% endif %}
+        <div class="row">
+            {% if accepted_problems %}
+                {% for problem in accepted_problems %}
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h3 class="card-title">{{ problem.title }}</h3>
+                                <p class="card-text description"><strong>Description:</strong>
+                                    {% for paragraph in problem.description.splitlines %}
+                                        <span>{{ paragraph }}</span>
+                                    {% endfor %}
+                                </p>
+                                <p class="card-text solution"><strong>Solution:</strong>
+                                    {% for paragraph in problem.solution.splitlines %}
+                                        <span>{{ paragraph }}</span>
+                                    {% endfor %}
+                                </p>
+                                <p><strong>Language:</strong> {{ problem.language }}</p>
+                                <span class="show-more">Show more</span>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No accepted problems found.</p>
+            {% endif %}
+        </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.show-more').on('click', function () {
+                var $this = $(this);
+                var $cardText = $this.siblings('.card-text');
+
+                if ($this.text() === 'Show more') {
+                    $cardText.css('max-height', 'none');
+                    $this.text('Show less');
+                } else {
+                    $cardText.css('max-height', '100px');
+                    $this.text('Show more');
+                }
+            });
+        });
+    </script>
 </body>
+
 </html>
+
     {% endif %}
 </div>
 
