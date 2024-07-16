@@ -3,3 +3,11 @@
 ## Contributors
 
 - Seraj Agbaryya
+- shadi
+- younes
+- mouhammad
+
+##TESTS
+- pip install coverage
+- coverage run manage.py test accounts.tests CBapp.tests
+- coverage report

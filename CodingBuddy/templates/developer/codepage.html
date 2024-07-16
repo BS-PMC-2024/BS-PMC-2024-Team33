@@ -4,14 +4,18 @@
 
 {% block extra_styles %}
 <style>
+    .container {
+        text-align: center;
+    }
     .code-problem {
         margin-bottom: 20px;
         padding: 20px;
         background-color: #f9f9f9;
         border-radius: 8px;
         box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+        height: 100%;
     }
-    .code-problem h2 {
+    .code-problem h2, .code-problem h3 {
         color: #333;
         margin-bottom: 10px;
     }
@@ -26,6 +30,28 @@
         font-family: 'Courier New', Courier, monospace;
         white-space: pre-wrap;
         overflow-x: auto;
+        max-height: 100px;
+        overflow: hidden;
+        position: relative;
+    }
+    .code-block.expanded {
+        max-height: none;
+    }
+    .show-more {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
+        display: block;
+        width: 100px;
+        text-align: center;
+        margin: 0 auto;
+    }
+    .show-more:hover {
+        background-color: #0056b3;
     }
     .back-button, .edit-button, .delete-button {
         margin-top: 10px;
@@ -60,31 +86,92 @@
     .delete-button:hover {
         background-color: #c82333;
     }
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-right: -15px;
+        margin-left: -15px;
+    }
+    .col-md-4 {
+        flex: 0 0 33.33333%;
+        max-width: 33.33333%;
+        padding-right: 15px;
+        padding-left: 15px;
+        box-sizing: border-box;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container">
     {% if is_developer %}
-        <h1>Code Problems Page</h1>
+        <h1>DEVELOPER ACCESS</h1>
+        <a class="btn btn-primary btn-lg mb-4" href="{% url 'developer:addcodepage' %}" role="button">Add Code Problem</a>
+
         {% if code_problems %}
-            <ul>
+            <div class="row">
                 {% for problem in code_problems %}
-                    <li class="code-problem">
-                        <h2>{{ problem.problem }}</h2>
-                        <div class="code-block">{{ problem.description|safe }}</div>
-                        <div class="code-block">{{ problem.solution|safe }}</div>
-                        <button onclick="window.location.href='{% url 'CBapp:edit_solution' problem.id %}'" class="edit-button">Edit Solution</button>
-                        <button onclick="deleteProblem('{{ problem.id }}')" class="delete-button">Delete</button>
-                    </li>
+                    <div class="col-md-4">
+                        <div class="code-problem">
+                            <h2>{{ problem.problem }}</h2>
+                            <div class="code-block" id="description-{{ problem.id }}">
+                                {{ problem.description|safe }}
+                            </div>
+                            <button class="show-more" onclick="toggleShowMore('description-{{ problem.id }}', this)">Show more</button>
+                            <div class="code-block" id="solution-{{ problem.id }}">
+                                {{ problem.solution|safe }}
+                            </div>
+                            <button class="show-more" onclick="toggleShowMore('solution-{{ problem.id }}', this)">Show more</button>
+                            <button onclick="window.location.href='{% url 'CBapp:edit_solution' problem.id %}'" class="edit-button">Edit Solution</button>
+                            <button onclick="deleteProblem('{{ problem.id }}')" class="delete-button">Delete</button>
+                        </div>
+                    </div>
                 {% endfor %}
-            </ul>
+            </div>
         {% else %}
             <p>No code problems found.</p>
         {% endif %}
         <button onclick="location.href='/'" class="back-button">Back</button>
     {% elif is_student %}
-        <h1>Coding Problems</h1>
+        <html>
+<head>
+    <title>Accepted Code Problems</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            width: 80%;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .problem {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background: #fafafa;
+        }
+
+        .problem h3 {
+            margin-top: 0;
+            color: #007bff;
+        }
+
+        .problem p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Accepted Code Problems</h1>
         <form method="get">
             <label for="language">Filter by Language:</label>
             <input type="text" id="language" name="language" value="{{ form.language.value }}">
@@ -94,18 +181,38 @@
             {% for problem in accepted_problems %}
                 <div class="problem">
                     <h3>{{ problem.title }}</h3>
-                    <div class="code-block">{{ problem.description|safe }}</div>
-                    <div class="code-block">{{ problem.solution|safe }}</div>
+                    <p><strong>Description:</strong></p>
+                    {% for paragraph in problem.description.splitlines %}
+                        <p>{{ paragraph }}</p>
+                    {% endfor %}
+                    <p><strong>Solution:</strong></p>
+                    {% for paragraph in problem.solution.splitlines %}
+                        <p>{{ paragraph }}</p>
+                    {% endfor %}
                     <p><strong>Language:</strong> {{ problem.language }}</p>
                 </div>
             {% endfor %}
         {% else %}
             <p>No accepted problems found.</p>
         {% endif %}
+    </div>
+</body>
+</html>
     {% endif %}
 </div>
 
 <script>
+    function toggleShowMore(id, button) {
+        const element = document.getElementById(id);
+        if (element.classList.contains('expanded')) {
+            element.classList.remove('expanded');
+            button.textContent = 'Show more';
+        } else {
+            element.classList.add('expanded');
+            button.textContent = 'Show less';
+        }
+    }
+
     function deleteProblem(problemId) {
         if (confirm('Are you sure you want to delete this problem?')) {
             const csrftoken = getCookie('csrftoken');

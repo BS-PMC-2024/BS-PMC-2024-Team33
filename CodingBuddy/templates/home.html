@@ -3,16 +3,99 @@
 {% block title %}Home | CodingBuddy{% endblock %}
 
 {% block content %}
-<div class="text-center">
-      <h1 class="display-4">Welcome To CodingBuddy!</h1>
-    <img src="{% static 'home/images/homepageMainPic.jpg' %}" alt="Coding Collaboration" class="img-fluid" style="max-width: 40%; height: auto; margin-top: 20px;">
+<style>
+  .hero-section {
+    position: relative;
+    text-align: center;
+    color: white;
+    margin-bottom: 20px;
+  }
+
+  .hero-title {
+    font-size: 3.5rem;
+    font-weight: bold;
+    margin: 0;
+    padding: 20px 0;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 15px 15px 0 0;
+  }
+
+  .hero-image {
+    background-image: url('https://www.codemotion.com/magazine/wp-content/uploads/2023/07/Collaborative-Coding.-A-developer-team-working-together.-min-896x504.jpg');
+    background-size: cover;
+    background-position: center;
+    height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0 0 15px 15px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* darken the image */
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    color: white;
+    text-align: center;
+  }
+
+  .hero-content p {
+    font-size: 1.2rem;
+    margin: 20px 0 0 0;
+  }
+
+  .jumbotron {
+    background-color: #f8f9fa;
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .btn-cta {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    text-transform: uppercase;
+    transition: background-color 0.3s ease;
+    display: inline-block;
+  }
+
+  .btn-cta:hover {
+    background-color: #0056b3;
+  }
+</style>
+
+<div class="hero-section">
+  <div class="hero-title">
+    Welcome To CodingBuddy!
+  </div>
+  <div class="hero-image">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+    </div>
+  </div>
 </div>
 
 <div class="jumbotron">
-
     <p class="lead">This is a simple, modern platform to practice coding, view multiple solutions, and receive AI-generated feedback.</p>
     <hr class="my-4">
     <p>Get started by solving problems and learning through interactive tutorials.</p>
-    <a class="btn btn-primary btn-lg" href="/codepage" role="button">View our coding problems!</a>
+    <a class="btn-cta" href="/codepage">View our coding problems!</a>
+
 </div>
 {% endblock %}

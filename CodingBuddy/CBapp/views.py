@@ -87,4 +87,4 @@ def ViewProblmesForStudent(request):
         if language:
             accepted_problems = accepted_problems.filter(language=language)
 
-    return render(request, 'student/Showing_Problems.html', {'accepted_problems': accepted_problems, 'form': form})
+    return render(request, 'developer/codepage.html', {'accepted_problems': accepted_problems, 'form': form})
