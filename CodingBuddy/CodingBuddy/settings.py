@@ -50,7 +50,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap5'
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
-#custom user
+FORMS_URLFIELD_ASSUME_HTTPS = True
 
 
 MIDDLEWARE = [
