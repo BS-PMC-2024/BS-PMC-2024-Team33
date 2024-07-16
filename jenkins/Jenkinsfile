@@ -54,7 +54,7 @@ pipeline {
     post {
         always {
             archiveArtifacts artifacts: '**/CodingBuddy/db.sqlite3', fingerprint: true
-            junit 'CodingBuddy/reports/test-results.xml'
+            junit 'CodingBuddy/reports/*.xml'
 
         }
     }
