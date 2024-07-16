@@ -38,13 +38,14 @@ pipeline {
                 '''
             }
         }
-        stage('Run Tests') {
+        stage('Run Tests with Coverage') {
             steps {
                 sh '''
                     #!/bin/bash
                     cd CodingBuddy
                     . venv/bin/activate
-                    pytest --junitxml=reports/test-results.xml
+                    coverage run --source='.' manage.py test
+                    coverage xml
                 '''
             }
         }
@@ -54,6 +55,8 @@ pipeline {
         always {
             archiveArtifacts artifacts: '**/CodingBuddy/db.sqlite3', fingerprint: true
             junit 'CodingBuddy/reports/test-results.xml'
+            publishCoverage adapters: [coberturaAdapter('CodingBuddy/coverage.xml')]
+            cleanWs()
         }
     }
 }
