@@ -21,8 +21,8 @@ class SignupTest(TestCase):
         response = self.client.post('/accounts/signup/', {
             'username': 'testdeveloper',
             'email': 'testdeveloper@example.com',
-            'password1': 'password123',
-            'password2': 'password123',
+            'password1': 'tesaosdjas231',
+            'password2': 'tesaosdsjas231',
             'role': 'developer',
             'upload_file': ''
         })
