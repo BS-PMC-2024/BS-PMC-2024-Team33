@@ -88,29 +88,33 @@
 
 {% block content %}
     <div class="custom-container">
-        <h1>Tutorial List</h1>
+        {% if is_developer or is_staff %}
+            <h1>Tutorial List</h1>
 
-        <ul>
-            {% for tutorial in tutorials %}
-                <li>
-                    <div class="language"><strong>{{ tutorial.language }}</strong></div>
-                    <div class="tutorial-links">
-                        {% if tutorial.youtube_link %}
-                            <a href="{{ tutorial.youtube_link }}" target="_blank"><strong>YouTube Link:</strong> Watch on YouTube</a>
-                        {% endif %}
-                        {% if tutorial.medium_link %}
-                            <a href="{{ tutorial.medium_link }}" target="_blank"><strong>Medium Link:</strong> Read on Medium</a>
-                        {% endif %}
-                        {% if tutorial.wikipedia_link %}
-                            <a href="{{ tutorial.wikipedia_link }}" target="_blank"><strong>Wikipedia Link:</strong> Read on Wikipedia</a>
-                        {% endif %}
-                    </div>
-                    <a class="edit-link" href="/developer/tutorials/edit/{{ tutorial.id }}/">Edit</a>
-                </li>
-            {% empty %}
-                <li>No tutorials found.</li>
-            {% endfor %}
-        </ul>
-        <a class="add-tutorial" href="/developer/tutorials/add/">Add Tutorial</a>
+            <ul>
+                {% for tutorial in tutorials %}
+                    <li>
+                        <div class="language"><strong>{{ tutorial.language }}</strong></div>
+                        <div class="tutorial-links">
+                            {% if tutorial.youtube_link %}
+                                <a href="{{ tutorial.youtube_link }}" target="_blank"><strong>YouTube Link:</strong> Watch on YouTube</a>
+                            {% endif %}
+                            {% if tutorial.medium_link %}
+                                <a href="{{ tutorial.medium_link }}" target="_blank"><strong>Medium Link:</strong> Read on Medium</a>
+                            {% endif %}
+                            {% if tutorial.wikipedia_link %}
+                                <a href="{{ tutorial.wikipedia_link }}" target="_blank"><strong>Wikipedia Link:</strong> Read on Wikipedia</a>
+                            {% endif %}
+                        </div>
+                        <a class="edit-link" href="/developer/tutorials/edit/{{ tutorial.id }}/">Edit</a>
+                    </li>
+                {% empty %}
+                    <li>No tutorials found.</li>
+                {% endfor %}
+            </ul>
+            <a class="add-tutorial" href="/developer/tutorials/add/">Add Tutorial</a>
+        {% else %}
+            <p>You do not have access to this content.</p>
+        {% endif %}
     </div>
 {% endblock %}
