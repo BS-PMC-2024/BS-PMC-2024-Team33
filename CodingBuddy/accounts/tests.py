@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import User, Group
+from django.urls import reverse
 
 class SignupTest(TestCase):
     def setUp(self):
@@ -7,7 +8,7 @@ class SignupTest(TestCase):
         Group.objects.create(name='Developer')
 
     def test_signup_student(self):
-        response = self.client.post('/accounts/signup/', {
+        response = self.client.post(reverse('signup'), {
             'username': 'teststudent',
             'email': 'teststudent@example.com',
             'password1': 'tesaosdjas231',
@@ -18,7 +19,7 @@ class SignupTest(TestCase):
         self.assertTrue(User.objects.filter(username='teststudent').exists())
 
     def test_signup_developer(self):
-        response = self.client.post('/accounts/signup/', {
+        response = self.client.post(reverse('signup'), {
             'username': 'testdeveloper',
             'email': 'testdeveloper@example.com',
             'password1': 'tesaosdjas231',
@@ -28,3 +29,72 @@ class SignupTest(TestCase):
         })
         self.assertEqual(response.status_code, 200)  # Form should be re-rendered with error
         self.assertFalse(User.objects.filter(username='testdeveloper').exists())
+
+class LoginLogoutTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='testpassword')
+
+    def test_login(self):
+        response = self.client.post(reverse('login'), {
+            'username': 'testuser',
+            'password': 'testpassword'
+        })
+        self.assertEqual(response.status_code, 302)  # Redirect after successful login
+
+    def test_logout(self):
+        self.client.login(username='testuser', password='testpassword')
+        response = self.client.post(reverse('logout'))
+        self.assertEqual(response.status_code, 302)  # Redirect after successful logout
+
+class PasswordChangeTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='testpassword')
+        self.client.login(username='testuser', password='testpassword')
+
+    def test_password_change(self):
+        response = self.client.post(reverse('password_change'), {
+            'old_password': 'testpassword',
+            'new_password1': 'newpassword123',
+            'new_password2': 'newpassword123'
+        })
+        self.assertEqual(response.status_code, 302)  # Redirect after successful password change
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password('newpassword123'))
+
+class PasswordResetTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', email='test@example.com', password='testpassword')
+
+    def test_password_reset(self):
+        response = self.client.post(reverse('password_reset'), {'email': 'test@example.com'})
+        self.assertEqual(response.status_code, 302)  # Redirect after successful password reset request
+
+
+    def setUp(self):
+        self.student = User.objects.create_user(username='student', password='testpassword')
+        self.developer = User.objects.create_user(username='developer', password='testpassword')
+        self.admin = User.objects.create_user(username='admin', password='testpassword', is_staff=True)
+
+        student_group = Group.objects.create(name='Student')
+        developer_group = Group.objects.create(name='Developer')
+
+        self.student.groups.add(student_group)
+        self.developer.groups.add(developer_group)
+
+    def test_student_permissions(self):
+        self.client.login(username='student', password='testpassword')
+        response = self.client.get(reverse('CBapp:codepage'))
+        self.assertEqual(response.status_code, 200)  # Ensure student can access codepage
+
+    def test_developer_permissions(self):
+        self.client.login(username='developer', password='testpassword')
+        response = self.client.get(reverse('CBapp:tutorial_list_developer'))
+        self.assertEqual(response.status_code, 200)  # Ensure developer can access tutorial list
+
+    def test_admin_permissions(self):
+        self.client.login(username='admin', password='testpassword')
+        response = self.client.get(reverse('CBapp:CBstatus'))
+        self.assertEqual(response.status_code, 200)  # Ensure admin can access CBstatus
+
+if __name__ == '__main__':
+    unittest.main()

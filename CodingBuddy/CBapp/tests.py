@@ -1,5 +1,3 @@
-# CBapp/tests.py
-
 import django
 import unittest
 import os
@@ -12,22 +10,19 @@ django.setup()
 
 from django.test import TestCase, Client
 from django.urls import reverse
-#from CBapp.models import CodeProblem  # Corrected import path
-from django.test import TestCase, Client
-from django.urls import reverse
-from .models import CodeProblem
-from .controller import approveCB_views
-from .forms import AdminCodeProblemForm
-from .models import Tutorial
-from .forms import TutorialDeveloperForm
+from .models import CodeProblem, Tutorial
+from django.contrib.auth.models import User, Group
+
 
 class ViewProblemsForStudentTest(TestCase):
 
     def setUp(self):
-        # Set up the client
         self.client = Client()
+        self.user = User.objects.create_user(username='student', password='password')
+        self.student_group = Group.objects.create(name='Student')
+        self.user.groups.add(self.student_group)
+        self.client.login(username='student', password='password')
 
-        # Create sample problems
         self.problem1 = CodeProblem.objects.create(
             problem='Problem 1',
             description='Description for Problem 1',
@@ -49,9 +44,7 @@ class ViewProblemsForStudentTest(TestCase):
             status='not accepted',
             language='Python'
         )
-
-        # URL for the view
-        self.url = reverse('CBapp:student_problem')  # Correct URL name
+        self.url = reverse('CBapp:student_problem')
 
     def test_view_problems_for_student_no_filter(self):
         response = self.client.get(self.url)
@@ -74,15 +67,16 @@ class ViewProblemsForStudentTest(TestCase):
         self.assertNotContains(response, 'Problem 1')
         self.assertNotContains(response, 'Problem 3')
 
-if __name__ == '__main__':
-    unittest.main()
-
 
 class AdminProblemListViewTest(TestCase):
     def setUp(self):
         self.client = Client()
+        self.user = User.objects.create_user(username='admin', password='password')
+        self.user.is_staff = True
+        self.user.save()
+        self.client.login(username='admin', password='password')
+
         self.url = reverse('CBapp:CBstatus')
-        # Create some test CodeProblem objects
         self.problem1 = CodeProblem.objects.create(
             problem="Test Problem 1",
             description="Test Description 1",
@@ -107,9 +101,15 @@ class AdminProblemListViewTest(TestCase):
         self.assertContains(response, self.problem1.problem)
         self.assertContains(response, self.problem2.problem)
 
+
 class TutorialListViewTest(TestCase):
     def setUp(self):
         self.client = Client()
+        self.user = User.objects.create_user(username='developer', password='password')
+        self.developer_group = Group.objects.create(name='Developer')
+        self.user.groups.add(self.developer_group)
+        self.client.login(username='developer', password='password')
+
         self.url = reverse('CBapp:tutorial_list_developer')
         self.tutorial1 = Tutorial.objects.create(
             youtube_link='https://youtube.com/example1',
@@ -133,10 +133,92 @@ class TutorialListViewTest(TestCase):
         self.assertContains(response, self.tutorial1.youtube_link)
         self.assertContains(response, self.tutorial2.youtube_link)
 
-
     def tearDown(self):
         Tutorial.objects.all().delete()
 
 
+class AdditionalTests(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+        self.developer = User.objects.create_user(username='developer', password='password')
+        self.developer_group = Group.objects.create(name='Developer')
+        self.developer.groups.add(self.developer_group)
+        self.client.login(username='developer', password='password')
+
+        self.problem1 = CodeProblem.objects.create(
+            problem='Problem 1',
+            description='Description for Problem 1',
+            solution='Solution for Problem 1',
+            status='accepted',
+            language='Python'
+        )
+
+    def test_add_code_problem(self):
+        url = reverse('CBapp:add_code_problem')
+        data = {
+            'problem': 'New Problem',
+            'description': 'New Description',
+            'solution': 'New Solution',
+            'status': 'accepted',
+            'language': 'Python'
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(CodeProblem.objects.filter(problem='New Problem').exists())
+
+    def test_edit_code_problem(self):
+        url = reverse('CBapp:edit_solution', args=[self.problem1.id])
+        data = {
+            'problem': 'Updated Problem',
+            'description': 'Updated Description',
+            'solution': 'Updated Solution',
+            'status': 'accepted',
+            'language': 'Python'
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        self.problem1.refresh_from_db()
+        self.assertEqual(self.problem1.problem, 'Updated Problem')
+
+    def test_delete_code_problem(self):
+        url = reverse('CBapp:delete_problem', args=[self.problem1.id])
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(CodeProblem.objects.filter(id=self.problem1.id).exists())
+
+    def test_add_tutorial(self):
+        url = reverse('CBapp:add_tutorial')
+        data = {
+            'youtube_link': 'https://youtube.com/new_tutorial',
+            'medium_link': 'https://medium.com/new_tutorial',
+            'wikipedia_link': 'https://wikipedia.org/new_tutorial',
+            'language': 'python'
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Tutorial.objects.filter(youtube_link='https://youtube.com/new_tutorial').exists())
+
+    def test_edit_tutorial(self):
+        tutorial = Tutorial.objects.create(
+            youtube_link='https://youtube.com/tutorial',
+            medium_link='https://medium.com/tutorial',
+            wikipedia_link='https://wikipedia.org/tutorial',
+            language='python'
+        )
+        url = reverse('CBapp:edit_tutorial', args=[tutorial.id])
+        data = {
+            'youtube_link': 'https://youtube.com/updated_tutorial',
+            'medium_link': 'https://medium.com/updated_tutorial',
+            'wikipedia_link': 'https://wikipedia.org/updated_tutorial',
+            'language': 'python'
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        tutorial.refresh_from_db()
+        self.assertEqual(tutorial.youtube_link, 'https://youtube.com/updated_tutorial')
 
 
+
+if __name__ == '__main__':
+    unittest.main()
