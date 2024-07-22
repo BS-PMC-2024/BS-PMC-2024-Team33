@@ -5,24 +5,18 @@ pipeline {
         }
     }
 
-    environment {
-        VIRTUAL_ENV = "${env.WORKSPACE}/CodingBuddy/venv"
-        PATH = "${env.VIRTUAL_ENV}/bin:${env.PATH}"
-    }
-
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
             }
         }
-        stage('Set up Python') {
+        stage('Install Dependencies') {
             steps {
                 sh '''
                     #!/bin/bash
                     cd CodingBuddy
-                    python -m venv venv
-                    . venv/bin/activate
+                    pip install --upgrade pip
                     pip install -r requirements.txt
                 '''
             }
@@ -32,7 +26,6 @@ pipeline {
                 sh '''
                     #!/bin/bash
                     cd CodingBuddy
-                    . venv/bin/activate
                     python manage.py migrate
                 '''
             }
@@ -42,7 +35,6 @@ pipeline {
                 sh '''
                     #!/bin/bash
                     cd CodingBuddy
-                    . venv/bin/activate
                     coverage run --source='.' manage.py test
                     coverage xml
                 '''
