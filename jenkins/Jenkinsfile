@@ -1,39 +1,56 @@
 pipeline {
-    agent {
-        docker {
-            image 'python'
-        }
-    }
+    agent none
 
     stages {
         stage('Checkout') {
+            agent {
+                docker {
+                    image 'alpine/git' // A lightweight Docker image for Git operations
+                }
+            }
             steps {
                 checkout scm
             }
         }
-        stage('Install Dependencies') {
+
+        stage('Set up Python') {
+            agent {
+                docker {
+                    image 'python:3.12-alpine' // Use a Docker image with Python pre-installed
+                }
+            }
             steps {
                 sh '''
-                    #!/bin/bash
+                    #!/bin/sh
                     cd CodingBuddy
-                    pip install --upgrade pip
-                    pip install -r requirements.txt
                 '''
             }
         }
+
         stage('Run Migrations') {
+            agent {
+                docker {
+                    image 'python:3.12-alpine' // Use the same Docker image for consistency
+                }
+            }
             steps {
                 sh '''
-                    #!/bin/bash
+                    #!/bin/sh
                     cd CodingBuddy
                     python manage.py migrate
                 '''
             }
         }
+
         stage('Run Tests with Coverage') {
+            agent {
+                docker {
+                    image 'python:3.12-alpine' // Use the same Docker image for consistency
+                }
+            }
             steps {
                 sh '''
-                    #!/bin/bash
+                    #!/bin/sh
                     cd CodingBuddy
                     coverage run --source='.' manage.py test
                     coverage xml
