@@ -1,6 +1,6 @@
 pipeline {
     agent none
-
+    stages{
         stage('Set up Python') {
             agent {
                 docker {
@@ -36,7 +36,7 @@ pipeline {
                 '''
             }
         }
-    
+    }
     post {
         always {
             junit 'CodingBuddy/reports/*.xml'
