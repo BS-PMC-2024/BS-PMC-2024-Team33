@@ -19,8 +19,6 @@ pipeline {
         stage('Run Migrations') {
             steps {
                 sh '''
-                    #!/bin/sh
-                    cd CodingBuddy
                     python manage.py migrate
                 '''
             }
@@ -29,8 +27,6 @@ pipeline {
         stage('Run Tests with Coverage') {
             steps {
                 sh '''
-                    #!/bin/sh
-                    cd CodingBuddy
                     coverage run --source='.' manage.py test
                     coverage xml
                 '''
