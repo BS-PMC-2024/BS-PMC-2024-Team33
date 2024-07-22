@@ -36,8 +36,7 @@ pipeline {
                 '''
             }
         }
-    }
-
+    
     post {
         always {
             junit 'CodingBuddy/reports/*.xml'
