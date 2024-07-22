@@ -1,38 +1,22 @@
 pipeline {
     agent none
 
-    stages {
-        stage('Checkout') {
-            agent {
-                docker {
-                    image 'alpine/git' // A lightweight Docker image for Git operations
-                }
-            }
-            steps {
-                checkout scm
-            }
-        }
-
         stage('Set up Python') {
             agent {
                 docker {
-                    image 'python' // Use a Docker image with Python pre-installed
+                    image 'python' 
                 }
             }
             steps {
                 sh '''
                     #!/bin/sh
                     cd CodingBuddy
+                    python py_compile manage.py
                 '''
             }
         }
 
         stage('Run Migrations') {
-            agent {
-                docker {
-                    image 'python:3.12-alpine' // Use the same Docker image for consistency
-                }
-            }
             steps {
                 sh '''
                     #!/bin/sh
@@ -43,11 +27,6 @@ pipeline {
         }
 
         stage('Run Tests with Coverage') {
-            agent {
-                docker {
-                    image 'python:3.12-alpine' // Use the same Docker image for consistency
-                }
-            }
             steps {
                 sh '''
                     #!/bin/sh
