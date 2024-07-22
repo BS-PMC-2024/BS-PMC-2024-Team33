@@ -11,7 +11,7 @@ pipeline {
                 sh '''
                     #!/bin/sh
                     cd CodingBuddy
-                    python py_compile manage.py
+                    python -m py_compile manage.py
                 '''
             }
         }
