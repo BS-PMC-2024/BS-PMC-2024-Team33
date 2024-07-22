@@ -16,31 +16,26 @@ pipeline {
             }
         }
 
-        stage('Run Migrations') {
-            agent{
-                steps {
-                    sh '''
-                        python manage.py migrate
-                    '''
-                }
-            }
-        }
 
         stage('Run Tests with Coverage') {
             agent{
-                steps {
-                    sh '''
-                        coverage run --source='.' manage.py test
-                        coverage xml
-                    '''
+                docker {
+                    image 'qnib/pytest' 
                 }
             }
+                steps {
+                    sh '''
+                        cd CodingBuddy
+                        python manage.py test
+                    '''
+                }
+           
         }
     }
     
     post {
         always {
-            junit 'CodingBuddy/reports/*.xml'
+            junit 'CodingBuddy/test-reports/*.xml'
         }
     }
 }
