@@ -17,22 +17,26 @@ pipeline {
         }
 
         stage('Run Migrations') {
-            steps {
-                sh '''
-                    python manage.py migrate
-                '''
+            agent{
+                steps {
+                    sh '''
+                        python manage.py migrate
+                    '''
+                }
             }
         }
 
         stage('Run Tests with Coverage') {
-            steps {
-                sh '''
-                    coverage run --source='.' manage.py test
-                    coverage xml
-                '''
+            agent{
+                steps {
+                    sh '''
+                        coverage run --source='.' manage.py test
+                        coverage xml
+                    '''
+                }
             }
         }
-    }
+    
     post {
         always {
             junit 'CodingBuddy/reports/*.xml'
