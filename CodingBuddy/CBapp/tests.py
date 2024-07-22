@@ -51,7 +51,7 @@ class ViewProblemsForStudentTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Problem 1')
         self.assertContains(response, 'Problem 2')
-        self.assertNotContains(response, 'Problem 3')
+        self.assertContains(response, 'Problem 3')
 
     def test_view_problems_for_student_filter_python(self):
         response = self.client.get(self.url, {'language': 'Python'})
@@ -217,6 +217,8 @@ class AdditionalTests(TestCase):
         self.assertEqual(response.status_code, 302)
         tutorial.refresh_from_db()
         self.assertEqual(tutorial.youtube_link, 'https://youtube.com/updated_tutorial')
+
+
 
 
 

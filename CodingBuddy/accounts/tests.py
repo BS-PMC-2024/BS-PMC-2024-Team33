@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase,Client
 from django.contrib.auth.models import User, Group
 from django.urls import reverse
 
@@ -95,6 +95,40 @@ class PasswordResetTest(TestCase):
         self.client.login(username='admin', password='testpassword')
         response = self.client.get(reverse('CBapp:CBstatus'))
         self.assertEqual(response.status_code, 200)  # Ensure admin can access CBstatus
+
+
+class UserFlowTest(TestCase):
+    def setUp(self):
+        # Set up the client
+        self.client = Client()
+
+        # Create groups
+        self.student_group = Group.objects.create(name='Student')
+        self.developer_group = Group.objects.create(name='Developer')
+
+    def test_user_signup_login_access(self):
+        # Sign up as a student
+        signup_response = self.client.post(reverse('signup'), {
+            'username': 'teststudent',
+            'email': 'teststudent@example.com',
+            'password1': 'tesaosdjas231',
+            'password2': 'tesaosdjas231',
+            'role': 'student'
+        })
+        self.assertEqual(signup_response.status_code, 302)
+        self.assertTrue(User.objects.filter(username='teststudent').exists())
+
+        # Log in as the student
+        login_response = self.client.post(reverse('login'), {
+            'username': 'teststudent',
+            'password': 'tesaosdjas231'
+        })
+        self.assertEqual(login_response.status_code, 302)
+
+        # Access a restricted page
+        restricted_page_response = self.client.get(reverse('CBapp:codepage'))
+        self.assertEqual(restricted_page_response.status_code, 200)
+
 
 if __name__ == '__main__':
     unittest.main()

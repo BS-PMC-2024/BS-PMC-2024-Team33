@@ -21,7 +21,7 @@ def delete_problem(request, problem_id):
 def addcodepage(request):
     if request.method == 'POST':
         problem = request.POST.get('problem')
-        code_problems.append(problem)
+        CodeProblem.append(problem)
         return redirect('codepage')  # Redirect to the codepage view
     return render(request, 'developer/addcodepage.html')
 

@@ -1,8 +1,7 @@
 pipeline {
     agent {
         docker {
-            image 'python' // Specify the Docker image with Python installed
-            args '-u root:root' // Run as root to avoid permission issues
+            image 'python'
         }
     }
 
@@ -53,9 +52,7 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: '**/CodingBuddy/db.sqlite3', fingerprint: true
             junit 'CodingBuddy/reports/*.xml'
-
         }
     }
 }
