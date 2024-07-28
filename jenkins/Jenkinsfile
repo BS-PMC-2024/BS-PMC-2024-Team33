@@ -20,13 +20,15 @@ pipeline {
         stage('Run Tests with Coverage') {
             agent{
                 docker {
-                    image 'qnib/pytest' 
+                    image 'python' 
                 }
             }
                 steps {
                     sh '''
                         cd CodingBuddy
                         python manage.py test
+                        coverage run --source='.' manage.py test
+                        coverage xml
                     '''
                 }
            
