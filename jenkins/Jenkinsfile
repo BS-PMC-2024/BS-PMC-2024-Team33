@@ -1,5 +1,5 @@
 pipeline {
-    agent none
+    agent any
     stages{
         stage('Set up Python') {
             agent {
@@ -11,8 +11,6 @@ pipeline {
                 sh '''
                     #!/bin/sh
                     cd CodingBuddy
-                    virtualenv --python=python3.12 env
-                    env/bin/pip install -r requirements.txt
                     python -m py_compile manage.py
                 '''
             }
@@ -28,7 +26,7 @@ pipeline {
                 steps {
                     sh '''
                         cd CodingBuddy
-                        python manage.py jenkins --enable-coverage
+                        python manage.py test
                     '''
                 }
            
