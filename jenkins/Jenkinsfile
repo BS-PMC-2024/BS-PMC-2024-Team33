@@ -11,9 +11,8 @@ pipeline {
                 sh '''
                     #!/bin/sh
                     cd CodingBuddy
-                    python -m venv venv
-                    . venv/bin/activate
-                    pip install -r requirements.txt
+                    virtualenv --python=python3.12 env
+                    env/bin/pip install -r requirements.txt
                     python -m py_compile manage.py
                 '''
             }
