@@ -11,13 +11,16 @@ pipeline {
                 sh '''
                     #!/bin/sh
                     cd CodingBuddy
+                    python -m venv venv
+                    . venv/bin/activate
+                    pip install -r requirements.txt
                     python -m py_compile manage.py
                 '''
             }
         }
 
 
-        stage('Run Tests with Coverage') {
+        stage('Run Tests') {
             agent{
                 docker {
                     image 'python' 
@@ -26,9 +29,7 @@ pipeline {
                 steps {
                     sh '''
                         cd CodingBuddy
-                        python manage.py test
-                        coverage run --source='.' manage.py test
-                        coverage xml
+                        python manage.py jenkins --enable-coverage
                     '''
                 }
            
