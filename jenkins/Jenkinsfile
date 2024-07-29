@@ -1,5 +1,11 @@
 pipeline {
     agent any
+        environment {
+        VIRTUAL_ENV = "${env.WORKSPACE}/CodingBuddy/venv"
+        PATH = "${env.VIRTUAL_ENV}/bin:${env.PATH}"
+        //DJANGO_SETTINGS_MODULE='CodingBuddy.settings'
+    }
+
     stages{
         stage('Set up Python') {
             agent {
@@ -26,6 +32,7 @@ pipeline {
                 steps {
                     sh '''
                         cd CodingBuddy
+                        . venv/bin/activate
                         python manage.py test
                     '''
                 }
