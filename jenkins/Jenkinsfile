@@ -32,7 +32,8 @@ pipeline {
                 steps {
                     sh '''
                         cd CodingBuddy
-                        . venv/scripts/activate.bat
+                        python -m venv .venv
+                        .venv/scripts/activate
                         python manage.py test
                     '''
                 }
