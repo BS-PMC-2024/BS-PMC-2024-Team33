@@ -7,7 +7,7 @@
     .container {
         text-align: center;
     }
-    .code-problem {
+    .code-problem, .card {
         margin-bottom: 20px;
         padding: 20px;
         background-color: #f9f9f9;
@@ -15,11 +15,11 @@
         box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
         height: 100%;
     }
-    .code-problem h2, .code-problem h3 {
+    .code-problem h2, .code-problem h3, .card-title {
         color: #333;
         margin-bottom: 10px;
     }
-    .code-problem p {
+    .code-problem p, .card-text {
         color: #777;
     }
     .code-block {
@@ -125,6 +125,25 @@
                             <button class="show-more" onclick="toggleShowMore('solution-{{ problem.id }}', this)">Show more</button>
                             <button onclick="window.location.href='{% url 'CBapp:edit_solution' problem.id %}'" class="edit-button">Edit Solution</button>
                             <button onclick="deleteProblem('{{ problem.id }}')" class="delete-button">Delete</button>
+
+                            <!-- Display comments -->
+                            <div class="comments">
+                                <h3>Comments</h3>
+                                {% for comment in problem.comments.all %}
+                                    <div class="comment">
+                                        <strong>{{ comment.user.username }}</strong>: {{ comment.content }}
+                                        <p><em>{{ comment.created_at }}</em></p>
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Add new comment -->
+                            <form method="post" action="{% url 'CBapp:codepage' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="problem_id" value="{{ problem.id }}">
+                                {{ comment_form.as_p }}
+                                <button type="submit" class="btn btn-secondary">Add Comment</button>
+                            </form>
                         </div>
                     </div>
                 {% endfor %}
@@ -134,51 +153,6 @@
         {% endif %}
         <button onclick="location.href='/'" class="back-button">Back</button>
     {% elif is_student %}
-   <!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accepted Code Problems</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f4f4f4;
-        }
-
-        .container {
-            margin-top: 20px;
-        }
-
-        .card {
-            margin-bottom: 20px;
-        }
-
-        .card-title {
-            color: #007bff;
-        }
-
-        .card-text {
-            max-height: 100px;
-            overflow: hidden;
-        }
-
-        .show-more {
-            cursor: pointer;
-            color: #007bff;
-            font-weight: bold;
-            text-decoration: underline;
-        }
-
-        .show-more:hover {
-            color: #0056b3;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="container">
         <h1 class="mb-4">Code Problems</h1>
         <form method="get" class="mb-4">
             <div class="form-group">
@@ -193,19 +167,35 @@
                     <div class="col-md-4">
                         <div class="card">
                             <div class="card-body">
-                                <h3 class="card-title">{{ problem.title }}</h3>
-                                <p class="card-text description"><strong>Description:</strong>
-                                    {% for paragraph in problem.description.splitlines %}
-                                        <span>{{ paragraph }}</span>
-                                    {% endfor %}
-                                </p>
-                                <p class="card-text solution"><strong>Solution:</strong>
-                                    {% for paragraph in problem.solution.splitlines %}
-                                        <span>{{ paragraph }}</span>
-                                    {% endfor %}
-                                </p>
+                                <h3 class="card-title">{{ problem.problem }}</h3>
+                                <div class="code-block" id="description-{{ problem.id }}">
+                                    {{ problem.description|safe }}
+                                </div>
+                                <button class="show-more" onclick="toggleShowMore('description-{{ problem.id }}', this)">Show more</button>
+                                <div class="code-block" id="solution-{{ problem.id }}">
+                                    {{ problem.solution|safe }}
+                                </div>
+                                <button class="show-more" onclick="toggleShowMore('solution-{{ problem.id }}', this)">Show more</button>
                                 <p><strong>Language:</strong> {{ problem.language }}</p>
-                                <span class="show-more">Show more</span>
+
+                                <!-- Display comments -->
+                                <div class="comments">
+                                    <h3>Comments</h3>
+                                    {% for comment in problem.comments.all %}
+                                        <div class="comment">
+                                            <strong>{{ comment.user.username }}</strong>: {{ comment.content }}
+                                            <p><em>{{ comment.created_at }}</em></p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <!-- Add new comment -->
+                                <form method="post" action="{% url 'CBapp:codepage' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="problem_id" value="{{ problem.id }}">
+                                    {{ comment_form.as_p }}
+                                    <button type="submit" class="btn btn-secondary">Add Comment</button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -214,78 +204,42 @@
                 <p>No accepted problems found.</p>
             {% endif %}
         </div>
-    </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            $('.show-more').on('click', function () {
-                var $this = $(this);
-                var $cardText = $this.siblings('.card-text');
-
-                if ($this.text() === 'Show more') {
-                    $cardText.css('max-height', 'none');
-                    $this.text('Show less');
-                } else {
-                    $cardText.css('max-height', '100px');
-                    $this.text('Show more');
-                }
-            });
-        });
-    </script>
-</body>
-
-</html>
-
+    {% else %}
+        <h1>Unauthorized Access</h1>
+        <p>You are not authorized to access this page.</p>
     {% endif %}
 </div>
-
 <script>
     function toggleShowMore(id, button) {
-        const element = document.getElementById(id);
-        if (element.classList.contains('expanded')) {
-            element.classList.remove('expanded');
-            button.textContent = 'Show more';
-        } else {
-            element.classList.add('expanded');
+        var codeBlock = document.getElementById(id);
+        codeBlock.classList.toggle('expanded');
+        if (codeBlock.classList.contains('expanded')) {
             button.textContent = 'Show less';
+        } else {
+            button.textContent = 'Show more';
         }
     }
 
     function deleteProblem(problemId) {
-        if (confirm('Are you sure you want to delete this problem?')) {
-            const csrftoken = getCookie('csrftoken');
+        if (confirm("Are you sure you want to delete this problem?")) {
             fetch(`/delete_problem/${problemId}/`, {
-                method: 'POST',
+                method: 'DELETE',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrftoken
+                    'X-CSRFToken': '{{ csrf_token }}',
                 },
-                body: JSON.stringify({ problem_id: problemId })
             })
             .then(response => {
                 if (response.ok) {
-                    window.location.reload();
+                    location.reload();
                 } else {
-                    alert('Failed to delete problem.');
+                    alert("Error deleting problem");
                 }
             })
-            .catch(error => console.error('Error deleting problem:', error));
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Error deleting problem");
+            });
         }
-    }
-
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
     }
 </script>
 {% endblock %}

@@ -1,7 +1,7 @@
 from django import forms
 from .models import CodeProblem
 from .models import Tutorial
-
+from .models import CodeProblem, Comment
 class CodeProblemForm(forms.ModelForm):
     class Meta:
         model = CodeProblem
@@ -19,3 +19,7 @@ class AdminCodeProblemForm(forms.ModelForm):
     class Meta:
         model = CodeProblem
         fields = ['status']
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['content']
