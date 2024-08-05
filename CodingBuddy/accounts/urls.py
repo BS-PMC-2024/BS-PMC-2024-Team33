@@ -9,4 +9,5 @@ urlpatterns = [
     path('signup_success/', views.signup_success, name='signup_success'),
     path('unapproved_users/', views.InactiveUserListView.as_view(), name='unapproved_users'),
     path('approve_users/', views.ApproveUsersView.as_view(), name='approve_users'),
+
 ]
