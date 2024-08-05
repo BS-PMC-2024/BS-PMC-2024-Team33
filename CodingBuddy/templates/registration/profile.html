@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Profile | CodingBuddy{% endblock %}
+
+{% block content %}
+<style>
+    body {
+      background: url('https://tender-licence.com/wp-content/uploads/2023/03/registration.jpg') no-repeat center center fixed;
+      background-size: cover;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding-top: 60px; /* Adjusted for the fixed header */
+    }
+
+    .navbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 10px 0;
+      z-index: 1000;
+    }
+
+    .navbar .logo {
+      color: white;
+      font-size: 1.5rem;
+      margin-left: 20px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .profile-card {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+      margin-top: -60px; /* Adjust for better centering */
+    }
+
+    .profile-card h2 {
+      margin-bottom: 1.5rem;
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .profile-card .form-label {
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: #555;
+    }
+
+    .profile-card .form-control {
+      border-radius: 10px;
+      padding: 0.75rem;
+      font-size: 1rem;
+    }
+
+    .profile-card .btn-primary {
+      background-color: #007bff;
+      border: none;
+      padding: 0.75rem;
+      border-radius: 50px;
+      font-size: 1.2rem;
+      transition: background-color 0.3s ease;
+      width: 100%;
+    }
+
+    .profile-card .btn-primary:hover {
+      background-color: #0056b3;
+    }
+
+    .profile-card .mb-3 {
+      text-align: left;
+    }
+
+    .profile-card .d-grid {
+      margin-top: 1.5rem;
+    }
+
+    .invalid-feedback {
+      color: red;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+</style>
+
+<div class="profile-card">
+    <h2>Profile</h2>
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group mb-3">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.errors %}
+            <div class="invalid-feedback" style="display: block;">
+                {% for error in field.errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+        <div class="d-grid">
+            <button class="btn btn-primary" type="submit">Update Profile</button>
+        </div>
+    </form>
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger mt-3">
+        {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

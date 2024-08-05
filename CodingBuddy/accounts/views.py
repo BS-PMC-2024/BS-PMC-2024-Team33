@@ -2,15 +2,17 @@
 Views for user account management, including sign-up and approval processes.
 """
 
-from django.views import View
-from django.contrib.auth.decorators import login_required
-from django.views.generic import ListView
 from django.contrib.admin.views.decorators import staff_member_required
-from django.utils.decorators import method_decorator
-from django.shortcuts import render, redirect
 from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User, Group
-from .forms import CustomUserCreationForm
+from django.shortcuts import render, redirect
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.views.generic import ListView
+
+from .forms import CustomUserCreationForm, CustomUserEditForm
+
 
 def signup_view(request):
     """
@@ -81,9 +83,14 @@ class ApproveUsersView(View):
                 developer_group.user_set.add(user)
         return redirect('unapproved_users')
 
+
 @login_required
 def profile_view(request):
-    """
-    Render the user's profile page.
-    """
-    return render(request, 'profile.html')
+    if request.method == 'POST':
+        form = CustomUserEditForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+    else:
+        form = CustomUserEditForm(instance=request.user)
+    return render(request, 'registration/profile.html', {'form': form})
