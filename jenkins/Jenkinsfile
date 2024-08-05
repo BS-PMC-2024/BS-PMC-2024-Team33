@@ -32,7 +32,7 @@ pipeline {
                 steps {
                     sh '''
                         cd CodingBuddy
-                        python pytest --verbose --junit-xml test-reports/results.xml
+                        pytest --verbose --junit-xml test-reports/results.xml
                     '''
                 }
            
