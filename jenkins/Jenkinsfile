@@ -26,15 +26,13 @@ pipeline {
         stage('Run Tests') {
             agent{
                 docker {
-                    image 'python' 
+                    image 'pytest' 
                 }
             }
                 steps {
                     sh '''
                         cd CodingBuddy
-                        python -m venv .venv
-                        .venv/bin/activate
-                        python manage.py test
+                        python pytest --verbose --junit-xml test-reports/results.xml
                     '''
                 }
            
