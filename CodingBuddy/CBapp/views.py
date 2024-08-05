@@ -11,7 +11,6 @@ from .models import CodeProblem, Comment
 from .forms import ProblemFilterForm, CommentForm
 def homepage(request):
     return render(request, 'developer/homepage.html')
-
 def delete_problem(request, problem_id):
     problem = get_object_or_404(CodeProblem, pk=problem_id)
     if request.method == 'POST':
@@ -103,6 +102,23 @@ def codepage(request):
 
     # Render the 'codepage.html' template with the context data
     return render(request, 'developer/codepage.html', context)
+
+@login_required
+def edit_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    if request.user != comment.user:
+        return redirect('CBapp:codepage')  # Redirect if the user is not the owner of the comment
+
+    if request.method == 'POST':
+        form = CommentForm(request.POST, instance=comment)
+        if form.is_valid():
+            form.save()
+            return redirect('CBapp:codepage')
+    else:
+        form = CommentForm(instance=comment)
+
+    return render(request, 'developer/edit_comment.html', {'form': form, 'comment': comment})
+
 
 def edit_solution(request, problem_id):
     problem = get_object_or_404(CodeProblem, pk=problem_id)
