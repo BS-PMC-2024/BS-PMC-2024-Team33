@@ -26,7 +26,7 @@ pipeline {
         stage('Run Tests') {
             agent{
                 docker {
-                    image 'kennethreitz/httpbin' 
+                    image 'qnib/pytest' 
                 }
             }
                 steps {
