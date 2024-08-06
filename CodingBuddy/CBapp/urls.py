@@ -19,5 +19,6 @@ urlpatterns = [
     path('admin/CBstatus/', approveCB_views.admin_problem_list, name='CBstatus'),
     path('admin/problems/<int:problem_id>/update/', approveCB_views.admin_update_problem, name='admin_update_problem'),
     path('edit_comment/<int:comment_id>/', views.edit_comment, name='edit_comment'),
+    path('student/tutorials/', tutorials_views.tutorial_list_student, name='student_tutorials'),
 
 ]

@@ -36,3 +36,10 @@ def edit_tutorial(request, tutorial_id):
     else:
         form = TutorialDeveloperForm(instance=tutorial)
     return render(request, 'developer/edit_tutorial.html', {'form': form})
+
+def tutorial_list_student(request):
+    tutorials = Tutorial.objects.all()
+    context = {
+        'tutorials': tutorials,
+    }
+    return render(request, 'student/tutorial_list.html', context)
