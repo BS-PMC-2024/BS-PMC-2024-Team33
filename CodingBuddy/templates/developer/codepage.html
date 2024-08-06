@@ -163,6 +163,7 @@
         <button onclick="location.href='/'" class="back-button">Back</button>
     {% elif is_student %}
         <h1 class="mb-4">Code Problems</h1>
+        <a class="btn btn-primary btn-lg mb-4" href="{% url 'CBapp:student_tutorials' %}" role="button">View Tutorials</a>
         <form method="get" class="mb-4">
             <div class="form-group">
                 <label for="language">Filter by Language:</label>

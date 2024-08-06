@@ -1,0 +1,25 @@
+<!-- student/tutorial_list.html -->
+{% extends 'base.html' %}
+
+{% block title %}Tutorials{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Tutorials</h1>
+    <div class="row">
+        {% for tutorial in tutorials %}
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title">{{ tutorial.get_language_display }}</h3>
+                        <p><strong>YouTube:</strong> <a href="{{ tutorial.youtube_link }}" target="_blank">{{ tutorial.youtube_link }}</a></p>
+                        <p><strong>Medium:</strong> <a href="{{ tutorial.medium_link }}" target="_blank">{{ tutorial.medium_link }}</a></p>
+                        <p><strong>Wikipedia:</strong> <a href="{{ tutorial.wikipedia_link }}" target="_blank">{{ tutorial.wikipedia_link }}</a></p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <button onclick="location.href='/'" class="back-button">Back</button>
+</div>
+{% endblock %}
