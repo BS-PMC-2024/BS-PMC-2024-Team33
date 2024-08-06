@@ -2,6 +2,8 @@ import datetime
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
+from django.views.decorators.http import require_http_methods
+
 from .forms import CodeProblemForm
 from .forms import ProblemFilterForm
 from .models import CodeProblem
@@ -17,13 +19,11 @@ def homepage(request):
     return render(request, 'developer/homepage.html')
 
 
+@require_http_methods(["DELETE"])
 def delete_problem(request, problem_id):
     problem = get_object_or_404(CodeProblem, pk=problem_id)
-    if request.method == 'POST':
-        problem.delete()
-        return JsonResponse({'message': 'Problem deleted successfully.'}, status=204)
-    return JsonResponse({'error': 'Invalid request method.'}, status=405)
-
+    problem.delete()
+    return JsonResponse({'message': 'Problem deleted successfully.'}, status=204)
 
 def addcodepage(request):
     if request.method == 'POST':
