@@ -1,6 +1,8 @@
-from django.test import TestCase,Client
+from _pytest import unittest
 from django.contrib.auth.models import User, Group
+from django.test import TestCase, Client
 from django.urls import reverse
+
 
 class SignupTest(TestCase):
     def setUp(self):

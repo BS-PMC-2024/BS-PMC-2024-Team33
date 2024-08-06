@@ -1,18 +1,22 @@
 import datetime
 
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views import View
+import markdown
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User, Group
+from django.db.models import Q
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.shortcuts import render, redirect
+from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_http_methods
 
 from .forms import CodeProblemForm
-from .forms import ProblemFilterForm
-from .models import CodeProblem
-from django.http import JsonResponse
-import markdown
-from django.utils.safestring import mark_safe
-from django.contrib.auth.decorators import login_required
-from .models import CodeProblem, Comment
+from .forms import MessageForm
 from .forms import ProblemFilterForm, CommentForm
+from .forms import TutorialDeveloperForm
+from .models import CodeProblem, Comment
+from .models import Message
+from .models import Tutorial
 
 
 def homepage(request):
@@ -141,18 +145,20 @@ def edit_solution(request, problem_id):
         form = CodeProblemForm(instance=problem)
     return render(request, 'developer/edit_solution.html', {'form': form, 'problem': problem})
 
-def ViewProblmesForStudent(request):
+
+@login_required
+def view_problems_for_student(request):
     accepted_problems = CodeProblem.objects.filter(status='accepted')
     form = ProblemFilterForm(request.GET or None)
+
     if form.is_valid():
         language = form.cleaned_data.get('language')
         if language:
             accepted_problems = accepted_problems.filter(language=language)
+
     return render(request, 'developer/codepage.html', {'accepted_problems': accepted_problems, 'form': form})
 
 
-from .models import Tutorial
-from .forms import TutorialDeveloperForm
 
 
 def tutorial_list_developer(request):
@@ -191,50 +197,46 @@ def edit_tutorial(request, tutorial_id):
     return render(request, 'developer/edit_tutorial.html', {'form': form})
 
 
-from django.contrib.auth.models import User, Group
-from django.shortcuts import render, redirect
-from .models import Message
-from .forms import MessageForm
-from django.db.models import Q
-
-
-def list_developers(request):
+def chat_page(request):
     developers_group = Group.objects.get(name='Developer')
     developers = User.objects.filter(groups=developers_group)
 
     # Retrieve all messages where the current user is either the sender or receiver
-    messages = Message.objects.filter(
-        Q(sender=request.user) | Q(receiver=request.user)
-    ).order_by('timestamp')
+    # Check for new messages
+    messages = Message.objects.filter(Q(sender=request.user) | Q(receiver=request.user)).order_by('timestamp')
+    new_messages = messages.filter(receiver=request.user, read=False).exists()
 
     if request.method == 'POST':
         form = MessageForm(request.POST)
         if form.is_valid():
             message = form.save(commit=False)
             message.sender = request.user
-            message.timestamp = datetime.datetime.now().timestamp()
-            message_count = Message.objects.count()  # Get the count of Message objects
-            # print(f"COUNT IS {message_count}")
+            message.timestamp = datetime.datetime.now()
             message.save()
-            message_count = Message.objects.count()  # Get the count of Message objects
-            # print(f"COUNT IS {message_count}")
-        else:
-            print("FORM NOT VALID")
-    form = MessageForm()
-    if request.user in developers:  # The user is DEVELOPER
-        # print(f'USERNAME IS {request.user}')
-        form.fields['receiver'].queryset = (User.objects.filter(groups__name='Developer')
-                                            .union(User.objects.filter(groups__name='Student')))
-    else:  # The user is STUDENT
-        # print(f'USERNAME IS {request.user}')
-        form.fields['receiver'].queryset = (User.objects.filter(groups__name='Developer'))
+            return redirect('/chat')  # Redirect to the same page to avoid re-submission
+    else:
+        form = MessageForm()
 
-    # print(messages)
-    return render(request, 'developer/list_developers.html',
-                  {'developers': developers, 'messages': messages, 'form': form})
+    # Mark received messages as read
+    messages.filter(receiver=request.user, read=False).update(read=True)
+
+    # Adjust the receiver queryset based on user role
+    if request.user in developers:  # The user is a DEVELOPER
+        form.fields['receiver'].queryset = User.objects.filter(groups__name='Developer').union(
+            User.objects.filter(groups__name='Student'))
+    else:  # The user is a STUDENT
+        form.fields['receiver'].queryset = User.objects.filter(groups__name='Developer')
+
+    return render(request, 'chat_page.html',
+                  {'messages': messages, 'form': form, 'user_has_new_messages': new_messages})
 
 
-
+@login_required
+def check_new_messages(request):
+    if request.user.is_authenticated:
+        new_messages = Message.objects.filter(receiver=request.user, read=False).exists()
+        return JsonResponse({'new_messages': new_messages})
+    return JsonResponse({'new_messages': False})
 
 @login_required
 def delete_comment(request, comment_id):

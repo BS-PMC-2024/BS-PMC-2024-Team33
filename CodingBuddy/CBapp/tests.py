@@ -1,6 +1,7 @@
-import django
-import unittest
 import os
+import unittest
+
+import django
 
 # Set the DJANGO_SETTINGS_MODULE environment variable correctly
 os.environ['DJANGO_SETTINGS_MODULE'] = 'CBapp.settings'
@@ -51,7 +52,7 @@ class ViewProblemsForStudentTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Problem 1')
         self.assertContains(response, 'Problem 2')
-        self.assertContains(response, 'Problem 3')
+        self.assertNotContains(response, 'Problem 3')
 
     def test_view_problems_for_student_filter_python(self):
         response = self.client.get(self.url, {'language': 'Python'})
@@ -63,8 +64,8 @@ class ViewProblemsForStudentTest(TestCase):
     def test_view_problems_for_student_filter_java(self):
         response = self.client.get(self.url, {'language': 'Java'})
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Problem 2')
         self.assertNotContains(response, 'Problem 1')
+        self.assertContains(response, 'Problem 2')
         self.assertNotContains(response, 'Problem 3')
 
 

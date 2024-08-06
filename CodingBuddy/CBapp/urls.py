@@ -1,7 +1,9 @@
 from django.urls import path
+
 from . import views
-from .controller import tutorials_views
 from .controller import approveCB_views
+from .controller import tutorials_views
+from .views import chat_page
 
 app_name = 'CBapp'
 
@@ -12,7 +14,7 @@ urlpatterns = [
     path('addcodepage', views.add_code_problem, name='add_code_problem'),
     path('edit_solution/<int:problem_id>/', views.edit_solution, name='edit_solution'),
     path('delete_problem/<int:problem_id>/', views.delete_problem, name='delete_problem'),
-    path('student_problem', views.ViewProblmesForStudent, name='student_problem'),
+    path('student_problem', views.view_problems_for_student, name='student_problem'),
     path('tutorials/', tutorials_views.tutorial_list_developer, name='tutorial_list_developer'),
     path('developer/tutorials/add/', tutorials_views.add_tutorial, name='add_tutorial'),
     path('developer/tutorials/edit/<int:tutorial_id>/', tutorials_views.edit_tutorial, name='edit_tutorial'),
@@ -21,5 +23,8 @@ urlpatterns = [
     path('edit_comment/<int:comment_id>/', views.edit_comment, name='edit_comment'),
     path('student/tutorials/', tutorials_views.tutorial_list_student, name='student_tutorials'),
     path('delete_comment/<int:comment_id>/', views.delete_comment, name='delete_comment'),
-    path('developers/', views.list_developers, name='list_developers')
+    path('chat/', chat_page, name='chat_page'),
+    path('chat/', views.chat_page, name='chat_page'),
+    path('check_new_messages/', views.check_new_messages, name='check_new_messages'),
+
 ]

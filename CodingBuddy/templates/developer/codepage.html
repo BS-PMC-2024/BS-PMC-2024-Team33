@@ -13,14 +13,11 @@
         background-color: #f9f9f9;
         border-radius: 8px;
         box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-        height: 100%;
-    }
-    .code-problem h2, .code-problem h3, .card-title {
-        color: #333;
-        margin-bottom: 10px;
-    }
-    .code-problem p, .card-text {
-        color: #777;
+        transition: all 0.3s ease-in-out;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+        max-width: 100%; /* Ensure it can expand */
     }
     .code-block {
         background-color: #f5f5f5;
@@ -31,11 +28,16 @@
         white-space: pre-wrap;
         overflow-x: auto;
         max-height: 100px;
-        overflow: hidden;
         position: relative;
+        transition: all 0.3s ease-in-out;
+        width: 100%; /* Ensure it takes full width */
     }
     .code-block.expanded {
         max-height: none;
+        width: auto; /* Allow it to expand */
+    }
+    .card.expanded {
+        max-width: none; /* Allow card to expand with content */
     }
     .show-more {
         background-color: #007bff;
@@ -233,7 +235,11 @@
 <script>
     function toggleShowMore(id, button) {
         var codeBlock = document.getElementById(id);
+        var card = codeBlock.closest('.code-problem, .card'); // Get the closest card element
+
         codeBlock.classList.toggle('expanded');
+        card.classList.toggle('expanded'); // Toggle expanded class on the card
+
         if (codeBlock.classList.contains('expanded')) {
             button.textContent = 'Show less';
         } else {
