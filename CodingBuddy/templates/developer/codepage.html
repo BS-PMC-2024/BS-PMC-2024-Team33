@@ -194,6 +194,15 @@
                                         <div class="comment">
                                             <strong>{{ comment.user.username }}</strong>: {{ comment.content }}
                                             <p><em>{{ comment.created_at }}</em></p>
+                                            {% if comment.user == request.user %}
+                                                <button onclick="showEditForm({{ comment.id }})" class="edit-button">Edit</button>
+                                                <!-- Edit comment form (initially hidden) -->
+                                                <form id="edit-form-{{ comment.id }}" method="post" action="{% url 'CBapp:edit_comment' comment.id %}" style="display:none;">
+                                                    {% csrf_token %}
+                                                    {{ comment_form.as_p }}
+                                                    <button type="submit" class="btn btn-primary">Update Comment</button>
+                                                </form>
+                                            {% endif %}
                                         </div>
                                     {% endfor %}
                                 </div>
