@@ -232,3 +232,14 @@ def list_developers(request):
     # print(messages)
     return render(request, 'developer/list_developers.html',
                   {'developers': developers, 'messages': messages, 'form': form})
+
+
+
+
+@login_required
+def delete_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+    if request.user == comment.user:
+        comment.delete()
+        return JsonResponse({'message': 'Comment deleted successfully.'}, status=204)
+    return JsonResponse({'error': 'You do not have permission to delete this comment.'}, status=403)
