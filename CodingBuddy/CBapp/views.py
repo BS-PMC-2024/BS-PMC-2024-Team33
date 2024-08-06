@@ -1,3 +1,5 @@
+import datetime
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from .forms import CodeProblemForm
@@ -9,8 +11,12 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.decorators import login_required
 from .models import CodeProblem, Comment
 from .forms import ProblemFilterForm, CommentForm
+
+
 def homepage(request):
     return render(request, 'developer/homepage.html')
+
+
 def delete_problem(request, problem_id):
     problem = get_object_or_404(CodeProblem, pk=problem_id)
     if request.method == 'POST':
@@ -18,12 +24,14 @@ def delete_problem(request, problem_id):
         return JsonResponse({'message': 'Problem deleted successfully.'}, status=204)
     return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
+
 def addcodepage(request):
     if request.method == 'POST':
         problem = request.POST.get('problem')
         CodeProblem.append(problem)
         return redirect('codepage')  # Redirect to the codepage view
     return render(request, 'developer/addcodepage.html')
+
 
 def add_code_problem(request):
     if request.method == 'POST':
@@ -120,6 +128,7 @@ def edit_comment(request, comment_id):
     return render(request, 'developer/edit_comment.html', {'form': form, 'comment': comment})
 
 
+
 def edit_solution(request, problem_id):
     problem = get_object_or_404(CodeProblem, pk=problem_id)
     if request.method == 'POST':
@@ -141,8 +150,10 @@ def ViewProblmesForStudent(request):
             accepted_problems = accepted_problems.filter(language=language)
     return render(request, 'developer/codepage.html', {'accepted_problems': accepted_problems, 'form': form})
 
+
 from .models import Tutorial
 from .forms import TutorialDeveloperForm
+
 
 def tutorial_list_developer(request):
     user = request.user
@@ -156,6 +167,7 @@ def tutorial_list_developer(request):
     }
     return render(request, 'developer/tutorial_list.html', context)
 
+
 def add_tutorial(request):
     if request.method == 'POST':
         form = TutorialDeveloperForm(request.POST)
@@ -165,6 +177,7 @@ def add_tutorial(request):
     else:
         form = TutorialDeveloperForm()
     return render(request, 'developer/add_tutorial.html', {'form': form})
+
 
 def edit_tutorial(request, tutorial_id):
     tutorial = Tutorial.objects.get(id=tutorial_id)
@@ -176,3 +189,46 @@ def edit_tutorial(request, tutorial_id):
     else:
         form = TutorialDeveloperForm(instance=tutorial)
     return render(request, 'developer/edit_tutorial.html', {'form': form})
+
+
+from django.contrib.auth.models import User, Group
+from django.shortcuts import render, redirect
+from .models import Message
+from .forms import MessageForm
+from django.db.models import Q
+
+
+def list_developers(request):
+    developers_group = Group.objects.get(name='Developer')
+    developers = User.objects.filter(groups=developers_group)
+
+    # Retrieve all messages where the current user is either the sender or receiver
+    messages = Message.objects.filter(
+        Q(sender=request.user) | Q(receiver=request.user)
+    ).order_by('timestamp')
+
+    if request.method == 'POST':
+        form = MessageForm(request.POST)
+        if form.is_valid():
+            message = form.save(commit=False)
+            message.sender = request.user
+            message.timestamp = datetime.datetime.now().timestamp()
+            message_count = Message.objects.count()  # Get the count of Message objects
+            # print(f"COUNT IS {message_count}")
+            message.save()
+            message_count = Message.objects.count()  # Get the count of Message objects
+            # print(f"COUNT IS {message_count}")
+        else:
+            print("FORM NOT VALID")
+    form = MessageForm()
+    if request.user in developers:  # The user is DEVELOPER
+        # print(f'USERNAME IS {request.user}')
+        form.fields['receiver'].queryset = (User.objects.filter(groups__name='Developer')
+                                            .union(User.objects.filter(groups__name='Student')))
+    else:  # The user is STUDENT
+        # print(f'USERNAME IS {request.user}')
+        form.fields['receiver'].queryset = (User.objects.filter(groups__name='Developer'))
+
+    # print(messages)
+    return render(request, 'developer/list_developers.html',
+                  {'developers': developers, 'messages': messages, 'form': form})

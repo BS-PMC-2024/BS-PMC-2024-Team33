@@ -19,6 +19,22 @@ class AdminCodeProblemForm(forms.ModelForm):
     class Meta:
         model = CodeProblem
         fields = ['status']
+
+from django import forms
+from django.contrib.auth.models import User, Group
+from .models import Message
+
+class MessageForm(forms.ModelForm):
+    receiver = forms.ModelChoiceField(
+        queryset=User.objects,
+        label="Send to",
+        required=True,
+        widget=forms.Select
+    )
+
+    class Meta:
+        model = Message
+        fields = ['receiver', 'content']
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
