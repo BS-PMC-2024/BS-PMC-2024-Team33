@@ -3,6 +3,8 @@ from django.contrib.auth.models import User, Group
 from django.test import TestCase, Client
 from django.urls import reverse
 
+from .models import UserProfile
+
 
 class SignupTest(TestCase):
     def setUp(self):
@@ -131,6 +133,15 @@ class UserFlowTest(TestCase):
         restricted_page_response = self.client.get(reverse('CBapp:codepage'))
         self.assertEqual(restricted_page_response.status_code, 200)
 
+
+class UserProfileTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='password')
+
+    def test_user_profile_creation(self):
+        user_profile = UserProfile.objects.create(user=self.user, bio='This is a bio.', upload_file=None)
+        self.assertEqual(user_profile.bio, 'This is a bio.')
+        self.assertEqual(user_profile.user.username, 'testuser')
 
 if __name__ == '__main__':
     unittest.main()

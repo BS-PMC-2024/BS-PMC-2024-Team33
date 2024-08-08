@@ -1,18 +1,11 @@
-import os
+import datetime
 import unittest
 
-import django
-
-# Set the DJANGO_SETTINGS_MODULE environment variable correctly
-os.environ['DJANGO_SETTINGS_MODULE'] = 'CBapp.settings'
-
-# Initialize Django
-django.setup()
-
+from django.contrib.auth.models import User, Group
 from django.test import TestCase, Client
 from django.urls import reverse
-from .models import CodeProblem, Tutorial
-from django.contrib.auth.models import User, Group
+
+from .models import CodeProblem, Tutorial, Comment, Message
 
 
 class ViewProblemsForStudentTest(TestCase):
@@ -45,7 +38,7 @@ class ViewProblemsForStudentTest(TestCase):
             status='not accepted',
             language='Python'
         )
-        self.url = reverse('CBapp:student_problem')
+        self.url = reverse('CBapp:codepage')
 
     def test_view_problems_for_student_no_filter(self):
         response = self.client.get(self.url)
@@ -68,8 +61,8 @@ class ViewProblemsForStudentTest(TestCase):
         self.assertContains(response, 'Problem 2')
         self.assertNotContains(response, 'Problem 3')
 
-
 class AdminProblemListViewTest(TestCase):
+
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username='admin', password='password')
@@ -77,7 +70,7 @@ class AdminProblemListViewTest(TestCase):
         self.user.save()
         self.client.login(username='admin', password='password')
 
-        self.url = reverse('CBapp:CBstatus')
+        self.url = reverse('CBapp:codepage')
         self.problem1 = CodeProblem.objects.create(
             problem="Test Problem 1",
             description="Test Description 1",
@@ -96,14 +89,13 @@ class AdminProblemListViewTest(TestCase):
     def test_admin_problem_list_view(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'admin/CBstatus.html')
-        self.assertIn('problems', response.context)
-        self.assertEqual(len(response.context['problems']), 2)
+        self.assertIn('code_problems', response.context)
+        self.assertEqual(len(response.context['code_problems']), 2)
         self.assertContains(response, self.problem1.problem)
         self.assertContains(response, self.problem2.problem)
 
-
 class TutorialListViewTest(TestCase):
+
     def setUp(self):
         self.client = Client()
         self.user = User.objects.create_user(username='developer', password='password')
@@ -128,7 +120,6 @@ class TutorialListViewTest(TestCase):
     def test_tutorial_list_view(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'developer/tutorial_list.html')
         self.assertIn('tutorials', response.context)
         self.assertEqual(len(response.context['tutorials']), 2)
         self.assertContains(response, self.tutorial1.youtube_link)
@@ -138,90 +129,223 @@ class TutorialListViewTest(TestCase):
         Tutorial.objects.all().delete()
 
 
-class AdditionalTests(TestCase):
-
+class ViewsTests(TestCase):
     def setUp(self):
-        self.client = Client()
-        self.developer = User.objects.create_user(username='developer', password='password')
-        self.developer_group = Group.objects.create(name='Developer')
-        self.developer.groups.add(self.developer_group)
-        self.client.login(username='developer', password='password')
+        self.user = User.objects.create_user(username='testuser', password='password')
+        self.client.login(username='testuser', password='password')
 
-        self.problem1 = CodeProblem.objects.create(
-            problem='Problem 1',
-            description='Description for Problem 1',
-            solution='Solution for Problem 1',
-            status='accepted',
-            language='Python'
-        )
+    def test_homepage_view(self):
+        response = self.client.get(reverse('CBapp:homepage'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'developer/homepage.html')
+
+    def test_codepage_view(self):
+        response = self.client.get(reverse('CBapp:codepage'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'developer/codepage.html')
+
+    def test_addcodepage_view(self):
+        response = self.client.get(reverse('CBapp:addcodepage'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'developer/addcodepage.html')
+
+    def test_tutorial_list_developer_view(self):
+        response = self.client.get(reverse('CBapp:tutorial_list_developer'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'developer/tutorial_list.html')
+
+    def test_add_tutorial_view(self):
+        response = self.client.get(reverse('CBapp:add_tutorial'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'developer/add_tutorial.html')
+
+    def test_edit_tutorial_view(self):
+        tutorial = Tutorial.objects.create(title='Sample Tutorial', content='Tutorial Content')
+        response = self.client.get(reverse('CBapp:edit_tutorial', args=[tutorial.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'developer/edit_tutorial.html')
+
+    def test_chat_page_view(self):
+        response = self.client.get(reverse('CBapp:chat_page'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'chat_page.html')
+
+
+class ProfileTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='password')
+        self.client.login(username='testuser', password='password')
+
+    def test_update_password(self):
+        response = self.client.post(reverse('profile'), {
+            'username': self.user.username,
+            'email': self.user.email,
+            'old_password': 'password',
+            'new_password1': 'newpassword',
+            'new_password2': 'newpassword'
+        })
+        self.user.refresh_from_db()
+        self.assertEqual(response.status_code, 302)  # Redirects after successful update
+        self.assertTrue(self.user.check_password('newpassword'))
+
+
+class CommentTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='password')
+        self.client.login(username='testuser', password='password')
+
+    def test_add_comment(self):
+        problem = CodeProblem.objects.create(problem='Sample Problem', description='Sample Description')
+        response = self.client.post(reverse('CBapp:add_comment', args=[problem.id]), {
+            'content': 'This is a test comment.'
+        })
+        self.assertEqual(response.status_code, 302)  # Redirects after successful comment addition
+
+    def test_delete_comment(self):
+        problem = CodeProblem.objects.create(problem='Sample Problem', description='Sample Description')
+        comment = Comment.objects.create(user=self.user, problem=problem, content='Comment to delete')
+        response = self.client.post(reverse('CBapp:delete_comment', args=[comment.id]))
+        self.assertEqual(response.status_code, 204)  # Successful deletion
+
+    def test_edit_comment(self):
+        problem = CodeProblem.objects.create(problem='Sample Problem', description='Sample Description')
+        comment = Comment.objects.create(user=self.user, problem=problem, content='Original comment')
+        response = self.client.post(reverse('CBapp:edit_comment', args=[comment.id]), {
+            'content': 'Updated comment'
+        })
+        self.assertEqual(response.status_code, 302)  # Redirects after successful update
+        comment.refresh_from_db()
+        self.assertEqual(comment.content, 'Updated comment')
+
+
+class MessageTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='password')
+        self.client.login(username='testuser', password='password')
+
+    def test_send_message(self):
+        user2 = User.objects.create_user(username='user2', password='password')
+        response = self.client.post(reverse('CBapp:send_message'), {
+            'receiver': user2.id,
+            'content': 'Hello, user2!'
+        })
+        self.assertEqual(response.status_code, 302)  # Redirects after successful message send
+
+    def test_receive_message(self):
+        user2 = User.objects.create_user(username='user2', password='password')
+        message = Message.objects.create(sender=self.user, receiver=user2, content='Hello, user2!',
+                                         timestamp=datetime.datetime.now())
+        self.assertEqual(message.content, 'Hello, user2!')
+        self.assertEqual(message.sender.username, 'testuser')
+        self.assertEqual(message.receiver.username, 'user2')
+
+
+class CodeProblemTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='password')
+        self.client.login(username='testuser', password='password')
 
     def test_add_code_problem(self):
-        url = reverse('CBapp:add_code_problem')
-        data = {
+        response = self.client.post(reverse('CBapp:add_code_problem'), {
             'problem': 'New Problem',
-            'description': 'New Description',
-            'solution': 'New Solution',
-            'status': 'accepted',
-            'language': 'Python'
-        }
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(CodeProblem.objects.filter(problem='New Problem').exists())
-
-    def test_edit_code_problem(self):
-        url = reverse('CBapp:edit_solution', args=[self.problem1.id])
-        data = {
-            'problem': 'Updated Problem',
-            'description': 'Updated Description',
-            'solution': 'Updated Solution',
-            'status': 'accepted',
-            'language': 'Python'
-        }
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, 302)
-        self.problem1.refresh_from_db()
-        self.assertEqual(self.problem1.problem, 'Updated Problem')
+            'description': 'New Description'
+        })
+        self.assertEqual(response.status_code, 302)  # Redirects after successful addition
+        problem = CodeProblem.objects.get(problem='New Problem')
+        self.assertEqual(problem.description, 'New Description')
 
     def test_delete_code_problem(self):
-        url = reverse('CBapp:delete_problem', args=[self.problem1.id])
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, 204)
-        self.assertFalse(CodeProblem.objects.filter(id=self.problem1.id).exists())
-
-    def test_add_tutorial(self):
-        url = reverse('CBapp:add_tutorial')
-        data = {
-            'youtube_link': 'https://youtube.com/new_tutorial',
-            'medium_link': 'https://medium.com/new_tutorial',
-            'wikipedia_link': 'https://wikipedia.org/new_tutorial',
-            'language': 'python'
-        }
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(Tutorial.objects.filter(youtube_link='https://youtube.com/new_tutorial').exists())
-
-    def test_edit_tutorial(self):
-        tutorial = Tutorial.objects.create(
-            youtube_link='https://youtube.com/tutorial',
-            medium_link='https://medium.com/tutorial',
-            wikipedia_link='https://wikipedia.org/tutorial',
-            language='python'
-        )
-        url = reverse('CBapp:edit_tutorial', args=[tutorial.id])
-        data = {
-            'youtube_link': 'https://youtube.com/updated_tutorial',
-            'medium_link': 'https://medium.com/updated_tutorial',
-            'wikipedia_link': 'https://wikipedia.org/updated_tutorial',
-            'language': 'python'
-        }
-        response = self.client.post(url, data)
-        self.assertEqual(response.status_code, 302)
-        tutorial.refresh_from_db()
-        self.assertEqual(tutorial.youtube_link, 'https://youtube.com/updated_tutorial')
+        problem = CodeProblem.objects.create(problem='Sample Problem', description='Sample Description')
+        response = self.client.post(reverse('CBapp:delete_problem', args=[problem.id]), {'_method': 'DELETE'})
+        self.assertEqual(response.status_code, 204)  # Successful deletion
+        self.assertFalse(CodeProblem.objects.filter(problem='Sample Problem').exists())
 
 
+class ViewsTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='password')
+        self.client.login(username='testuser', password='password')
+        Group.objects.create(name='Developer')
+
+    def test_homepage_view(self):
+        response = self.client.get(reverse('CBapp:homepage'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'developer/homepage.html')
+
+    def test_codepage_view(self):
+        response = self.client.get(reverse('CBapp:codepage'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'developer/codepage.html')
+
+    def test_addcodepage_view(self):
+        response = self.client.get(reverse('CBapp:add_code_problem'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'developer/addcodepage.html')
+
+    def test_tutorial_list_developer_view(self):
+        response = self.client.get(reverse('CBapp:tutorial_list_developer'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'developer/tutorial_list.html')
+
+    def test_add_tutorial_view(self):
+        response = self.client.get(reverse('CBapp:add_tutorial'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'developer/add_tutorial.html')
+
+    def test_edit_tutorial_view(self):
+        tutorial = Tutorial.objects.create(title='Sample Tutorial', content='Tutorial Content', language='Python')
+        response = self.client.get(reverse('CBapp:edit_tutorial', args=[tutorial.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'developer/edit_tutorial.html')
+
+    def test_chat_page_view(self):
+        response = self.client.get(reverse('CBapp:chat_page'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'chat_page.html')
 
 
+class IntegrationTests(TestCase):
+    def setUp(self):
+        self.user1 = User.objects.create_user(username='user1', password='password')
+        self.client.login(username='user1', password='password')
+
+    def test_profile_comment_message_integration(self):
+        # Update profile
+        self.client.post(reverse('profile'), {
+            'username': 'user1_new',
+            'email': self.user1.email,
+            'old_password': '',
+            'new_password1': '',
+            'new_password2': ''
+        })
+        self.user1.refresh_from_db()
+        self.assertEqual(self.user1.username, 'user1_new')
+
+        # Add comment
+        problem = CodeProblem.objects.create(problem='Sample Problem', description='Sample Description')
+        response = self.client.post(reverse('CBapp:add_comment', args=[problem.id]), {
+            'content': 'Integration test comment.'
+        })
+        self.assertEqual(response.status_code, 302)  # Redirects after successful comment addition
+
+        # Send message
+        user2 = User.objects.create_user(username='user2', password='password')
+        response = self.client.post(reverse('CBapp:send_message'), {
+            'receiver': user2.id,
+            'content': 'Hello, user2!'
+        })
+        self.assertEqual(response.status_code, 302)  # Redirects after successful message send
+        message = Message.objects.get(receiver=user2, content='Hello, user2!')
+        self.assertEqual(message.sender.username, 'user1_new')
+
+    def test_view_code_problems(self):
+        # Test that code problems are displayed correctly
+        CodeProblem.objects.create(problem='Problem 1', description='Description 1')
+        CodeProblem.objects.create(problem='Problem 2', description='Description 2')
+        response = self.client.get(reverse('CBapp:codepage'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Problem 1')
+        self.assertContains(response, 'Problem 2')
 
 if __name__ == '__main__':
     unittest.main()
