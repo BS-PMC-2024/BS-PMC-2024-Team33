@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Home | CodingBuddy{% endblock %}
+
+{% block content %}
+<style>
+    body {
+            font-family: Arial, sans-serif;
+            background-color: #007bff; /* Blue background color */
+            margin: 0;
+            padding: 0;
+            color: #ffffff; /* White text color */
+        }
+
+        .about-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #ffffff; /* White background for content */
+            color: #333333; /* Dark text color for readability */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff; /* Blue color for the heading */
+            margin-bottom: 20px;
+        }
+
+        p {
+            line-height: 1.6;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        p strong {
+            color: #007bff; /* Blue color for bold text */
+        }
+
+        p em {
+            font-style: italic;
+            color: #555555;
+        }
+</style>
+
+ <div class="about-container">
+        <h1>About Us</h1>
+        <p><strong>BS-PMC-2024-Team33 / CodingBuddy</strong> is a dedicated team focused on enhancing the learning experience for students and coding enthusiasts. Our project, <em>CodingBuddy</em>, is designed to provide an interactive platform where users can sharpen their coding skills, explore multiple solutions to coding problems, and receive AI-powered feedback to guide their learning journey.</p>
+        <p>Our vision is to make coding practice more personalized and insightful by offering a diverse set of coding challenges, tutorials, and a unique AI system that evaluates and provides feedback on user submissions. We believe that everyone, from beginners to advanced coders, deserves access to tools that help them improve and grow in their coding careers.</p>
+        <p>Our team is passionate about education and technology, and we are committed to delivering a platform that is not only functional but also user-friendly and accessible to all. We aim to create an environment where users can learn at their own pace, explore new concepts, and achieve their coding goals with the support of our innovative features.</p>
+        <p>Join us on this journey to make coding practice more engaging, effective, and enjoyable!</p>
+    </div>
+{% endblock %}
