@@ -4,7 +4,8 @@
     Tutorial List
 {% endblock %}
 
-{% block extra_head %}
+{% block extra_styles %}
+    {{ block.super }}
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         .custom-container {
@@ -113,32 +114,31 @@
                 {% endfor %}
             </ul>
             <a class="add-tutorial" href="/developer/tutorials/add/">Add Tutorial</a>
-        {% else %}
+        {% elif is_student %}
         <!-- student/tutorial_list.html -->
-        <div class="container">
-            <h1>Tutorials</h1>
-            <div class="row">
-                {% for tutorial in tutorials %}
-                <div class="col-md-4">
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h3 class="card-title">{{ tutorial.get_language_display }}</h3>
-                            <p><strong>YouTube:</strong> <a href="{{ tutorial.youtube_link }}" target="_blank">{{
-                                tutorial.youtube_link }}</a></p>
-                            <p><strong>Medium:</strong> <a href="{{ tutorial.medium_link }}" target="_blank">{{
-                                tutorial.medium_link }}</a></p>
-                            <p><strong>Wikipedia:</strong> <a href="{{ tutorial.wikipedia_link }}" target="_blank">{{
-                                tutorial.wikipedia_link }}</a></p>
+            <div class="container">
+                <h1>Tutorials</h1>
+                <div class="row">
+                    {% for tutorial in tutorials %}
+                    <div class="col-md-4">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h3 class="card-title">{{ tutorial.get_language_display }}</h3>
+                                <p><strong>YouTube:</strong> <a href="{{ tutorial.youtube_link }}" target="_blank">Watch on YouTube</a></p>
+                                <p><strong>Medium:</strong> <a href="{{ tutorial.medium_link }}" target="_blank">Read on Medium</a></p>
+                                <p><strong>Wikipedia:</strong> <a href="{{ tutorial.wikipedia_link }}" target="_blank">Read on Wikipedia</a></p>
+                            </div>
                         </div>
                     </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
+                <button class="back-button" onclick="location.href='/'">Back</button>
             </div>
-            <button class="back-button" onclick="location.href='/'">Back</button>
-        </div>
-    </div>
-        {% endif %}
+        {% else %}
+            <h1>Unauthorized Access</h1>
+            <p>You are not authorized to access this page.</p>
 
+        {% endif %}
     </div>
 {% endblock %}
 
