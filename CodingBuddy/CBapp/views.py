@@ -16,6 +16,8 @@ from .models import CodeProblem, Comment, Message, Tutorial
 def homepage(request):
     return render(request, 'developer/homepage.html')
 
+def aboutus(request):
+    return render(request, 'aboutus.html')
 
 @require_http_methods(["POST"])
 def delete_problem(request, problem_id):

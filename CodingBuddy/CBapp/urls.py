@@ -9,6 +9,7 @@ app_name = 'CBapp'
 
 urlpatterns = [
     path('homepage/', views.homepage, name='homepage'),
+    path('aboutus/', views.aboutus, name='aboutus'),
     path('codepage/', views.codepage, name='codepage'),
     path('addcodepage/', views.add_code_problem, name='add_code_problem'),
     path('edit_solution/<int:problem_id>/', views.edit_solution, name='edit_solution'),
