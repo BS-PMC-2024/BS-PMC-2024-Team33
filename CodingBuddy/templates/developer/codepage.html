@@ -5,10 +5,21 @@
 {% block extra_styles %}
     {{ block.super }}
     <style>
+        body {
+            background-image: url('https://media.geeksforgeeks.org/wp-content/cdn-uploads/20200305191534/How-to-Approach-a-Coding-Problem.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
         .container {
             text-align: center;
+            background-color: rgba(255, 255, 255, 0.8); /* Add a slight background to make text more readable */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
         }
-        .code-problem, .card {
+       .code-problem, .card {
             margin-bottom: 20px;
             padding: 20px;
             background-color: #f9f9f9;
