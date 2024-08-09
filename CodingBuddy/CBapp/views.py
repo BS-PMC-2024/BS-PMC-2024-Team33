@@ -214,9 +214,9 @@ def delete_comment(request, comment_id):
     return JsonResponse({'error': 'You do not have permission to delete this comment.'}, status=403)
 
 
-login_required
 
 
+@login_required
 @require_http_methods(["POST"])
 def add_comment(request, problem_id):
     problem = get_object_or_404(CodeProblem, id=problem_id)

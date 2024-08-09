@@ -1,20 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Tutorial</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+{% extends 'base.html' %}
+
+{% block title %}Home | Add Tutorial{% endblock %}
+
+{% block extra_styles %}
+    {{ block.super }}
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #f0f4f8;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
         .container {
             background: #fff;
             border-radius: 10px;
@@ -54,8 +44,8 @@
             background-color: #0056b3;
         }
     </style>
-</head>
-<body>
+{% endblock %}
+{% block content %}
     <div class="container">
         <h1>Add Tutorial</h1>
 
@@ -65,5 +55,4 @@
             <button type="submit">Add Tutorial</button>
         </form>
     </div>
-</body>
-</html>
+{% endblock %}
