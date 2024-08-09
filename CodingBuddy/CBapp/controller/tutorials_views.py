@@ -37,9 +37,20 @@ def edit_tutorial(request, tutorial_id):
         form = TutorialDeveloperForm(instance=tutorial)
     return render(request, 'developer/edit_tutorial.html', {'form': form})
 
+
 def tutorial_list_student(request):
-    tutorials = Tutorial.objects.all()
+    selected_language = request.GET.get('language', '')
+
+    if selected_language:
+        tutorials = Tutorial.objects.filter(language=selected_language)
+    else:
+        tutorials = Tutorial.objects.all()
+
+    languages = Tutorial.objects.values_list('language', flat=True).distinct()
+
     context = {
         'tutorials': tutorials,
+        'languages': languages,
+        'selected_language': selected_language,
     }
     return render(request, 'student/tutorial_list.html', context)

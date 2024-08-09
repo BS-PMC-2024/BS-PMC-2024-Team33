@@ -116,6 +116,42 @@
             <a class="add-tutorial" href="/developer/tutorials/add/">Add Tutorial</a>
         {% elif is_student %}
         <!-- student/tutorial_list.html -->
+        <div class="container">
+    <h1>Tutorials</h1>
+
+    <!-- Language Filter Form -->
+    <form method="get" class="mb-4">
+        <label for="language">Filter by Language:</label>
+        <select name="language" id="language">
+            <option value="">All Languages</option>
+            {% for language in languages %}
+                <option value="{{ language }}" {% if language == selected_language %}selected{% endif %}>
+                    {{ language }}
+                </option>
+            {% endfor %}
+        </select>
+        <!-- Add the Filter Button -->
+        <button type="submit" class="btn btn-primary mt-2">Filter</button>
+    </form>
+
+    <!-- Tutorials List -->
+    <div class="row">
+        {% for tutorial in tutorials %}
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title">{{ tutorial.get_language_display }}</h3>
+                        <p><strong>YouTube:</strong> <a href="{{ tutorial.youtube_link }}" target="_blank">{{ tutorial.youtube_link }}</a></p>
+                        <p><strong>Medium:</strong> <a href="{{ tutorial.medium_link }}" target="_blank">{{ tutorial.medium_link }}</a></p>
+                        <p><strong>Wikipedia:</strong> <a href="{{ tutorial.wikipedia_link }}" target="_blank">{{ tutorial.wikipedia_link }}</a></p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <button onclick="location.href='/'" class="back-button">Back</button>
+</div>
+    </div>
             <div class="container">
                 <h1>Tutorials</h1>
                 <div class="row">
