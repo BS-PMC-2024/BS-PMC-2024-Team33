@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ problem.problem }} | Coding Problem{% endblock %}
+
+{% block extra_styles %}
+    {{ block.super }}
+    <style>
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding-top: 40px;
+        }
+        h1 {
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        p {
+            text-align: center;
+            font-size: 18px;
+            color: #555;
+        }
+        .nav-tabs {
+            border-bottom: 2px solid #ddd;
+            justify-content: center;
+        }
+        .nav-tabs .nav-link {
+            border: none;
+            border-bottom: 2px solid transparent;
+            font-size: 18px;
+            font-weight: 500;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+        .nav-tabs .nav-link.active {
+            border-bottom-color: #007bff;
+            color: #007bff;
+        }
+        .tab-content {
+            margin-top: 30px;
+        }
+        .tab-pane {
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        .code-block, pre {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            line-height: 1.6;
+        }
+        h2, h3, h4 {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        ul, ol {
+            padding-left: 20px;
+        }
+        p {
+            margin-bottom: 15px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .back-button {
+            display: block;
+            margin: 30px auto 0;
+            background-color: #ccc;
+            color: #333;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+        .back-button:hover {
+            background-color: #bbb;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>{{ problem.problem }}</h1>
+    <p><strong>Language:</strong> {{ problem.language }}</p>
+
+    <ul class="nav nav-tabs" id="problemTabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="description-tab" data-bs-toggle="tab" href="#description" role="tab" aria-controls="description" aria-selected="true">Description</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="official-solution-tab" data-bs-toggle="tab" href="#official-solution" role="tab" aria-controls="official-solution" aria-selected="false">Official Solution</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="solutions-tab" data-bs-toggle="tab" href="#solutions" role="tab" aria-controls="solutions" aria-selected="false">Solutions</a>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="problemTabsContent">
+        <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
+            <div class="code-block">
+                {{ problem.description|safe }}
+            </div>
+
+            <h3>Submit Your Solution</h3>
+            <form method="post">
+                {% csrf_token %}
+                {{ solution_form.as_p }}
+                <button type="submit" class="btn btn-primary">Submit Solution</button>
+            </form>
+        </div>
+
+        <div class="tab-pane fade" id="official-solution" role="tabpanel" aria-labelledby="official-solution-tab">
+            <h3>Official Solution</h3>
+            <div class="code-block">
+                {{ official_solution|safe }}
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="solutions" role="tabpanel" aria-labelledby="solutions-tab">
+            <h3>Your Submitted Solutions</h3>
+            {% if user_solutions %}
+                {% for solution in user_solutions %}
+                    <div class="code-block">
+                        <strong>Your Solution:</strong>
+                        <pre>{{ solution.content|safe }}</pre>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>You have not submitted any solutions yet.</p>
+            {% endif %}
+
+            <h3>Other User Solutions</h3>
+            {% if other_solutions %}
+                {% for solution in other_solutions %}
+                    <div class="code-block">
+                        <strong>{{ solution.user.username }}'s Solution:</strong>
+                        <pre>{{ solution.content|safe }}</pre>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No other solutions submitted yet.</p>
+            {% endif %}
+
+        </div>
+
+        <button onclick="location.href='{% url 'CBapp:codepage' %}'" class="back-button">Back to Problems</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+    {{ block.super }}
+    <script>
+        // Initialize Bootstrap tabs
+        $(document).ready(function() {
+            $('#problemTabs a').on('click', function (e) {
+                e.preventDefault();
+                $(this).tab('show');
+            });
+        });
+    </script>
+{% endblock %}

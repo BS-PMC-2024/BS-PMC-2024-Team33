@@ -1,7 +1,6 @@
 from django import forms
+from .models import CodeProblem, Comment, Solution,Tutorial
 
-from .models import CodeProblem, Comment
-from .models import Tutorial
 
 
 class CodeProblemForm(forms.ModelForm):
@@ -43,3 +42,12 @@ class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ['content']
+
+
+class SolutionForm(forms.ModelForm):
+    class Meta:
+        model = Solution
+        fields = ['content']
+        widgets = {
+            'content': forms.Textarea(attrs={'rows': 10, 'cols': 80, 'placeholder': 'Enter your solution here...'}),
+        }

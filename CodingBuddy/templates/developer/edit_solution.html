@@ -1,6 +1,30 @@
 {% extends 'base.html' %}
 
-{% block title %}Edit Solution | CodingBuddy{% endblock %}
+{% block title %}Edit Problem | CodingBuddy{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+<style>
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-label {
+        font-weight: bold;
+    }
+    .CodeMirror {
+        min-height: 200px;
+        font-size: 14px;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    textarea {
+        height: 300px;      /* Set a fixed height */
+        overflow-y: auto;   /* Enable vertical scroll */
+        width: 100%;        /* Full width */
+        resize: vertical;   /* Allow manual vertical resizing */
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
@@ -8,12 +32,36 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <h1 class="h4 mb-0">Edit Solution</h1>
+                    <h1 class="h4 mb-0">Edit Problem</h1>
                 </div>
                 <div class="card-body">
                     <form method="post">
                         {% csrf_token %}
-                        {{ form.as_p }}
+
+                        <!-- Title Field -->
+                        <div class="form-group">
+                            <label for="{{ form.problem.id_for_label }}" class="form-label">Problem Title</label>
+                            {{ form.problem }}
+                        </div>
+
+                        <!-- Description Field (Markdown Editor) -->
+                        <div class="form-group">
+                            <label for="editor-description" class="form-label">Description</label>
+                            <textarea name="description" id="editor-description">{{ form.description.value }}</textarea>
+                        </div>
+
+                        <!-- Solution Field (Markdown Editor) -->
+                        <div class="form-group">
+                            <label for="editor-solution" class="form-label">Solution</label>
+                            <textarea name="solution" id="editor-solution">{{ form.solution.value }}</textarea>
+                        </div>
+
+                        <!-- Language Field -->
+                        <div class="form-group">
+                            <label for="{{ form.language.id_for_label }}" class="form-label">Programming Language</label>
+                            {{ form.language }}
+                        </div>
+
                         <div class="d-flex justify-content-between mt-4">
                             <button type="submit" class="btn btn-primary">Save Changes</button>
                             <a href="{% url 'CBapp:codepage' %}" class="btn btn-secondary">Cancel</a>
@@ -24,4 +72,13 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+<script>
+    // Initialize SimpleMDE editors
+    var simplemdeDescription = new SimpleMDE({ element: document.getElementById("editor-description") });
+    var simplemdeSolution = new SimpleMDE({ element: document.getElementById("editor-solution") });
+</script>
 {% endblock %}

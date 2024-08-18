@@ -1,5 +1,4 @@
 import datetime
-
 import markdown
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User, Group
@@ -8,13 +7,9 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_http_methods
+from .forms import CodeProblemForm, MessageForm, ProblemFilterForm, CommentForm, TutorialDeveloperForm, SolutionForm
+from .models import CodeProblem, Comment, Message, Tutorial, Solution
 
-from .forms import CodeProblemForm, MessageForm, ProblemFilterForm, CommentForm, TutorialDeveloperForm
-from .models import CodeProblem, Comment, Message, Tutorial
-
-
-def homepage(request):
-    return render(request, 'developer/homepage.html')
 
 def aboutus(request):
     return render(request, 'aboutus.html')
@@ -88,6 +83,37 @@ def codepage(request):
         'comment_form': comment_form,
     }
     return render(request, 'developer/codepage.html', context)
+
+@login_required
+def problem_detail(request, id):
+    problem = get_object_or_404(CodeProblem, id=id)
+    user_solutions = Solution.objects.filter(problem=problem, user=request.user)  # Solutions by the current user
+    other_solutions = Solution.objects.filter(problem=problem).exclude(user=request.user)  # Solutions by others
+    official_solution = problem.solution
+
+    solution_form = SolutionForm()
+
+    if request.method == 'POST':
+        solution_form = SolutionForm(request.POST)
+        if solution_form.is_valid():
+            solution = solution_form.save(commit=False)
+            solution.user = request.user
+            solution.problem = problem
+            solution.save()
+            return redirect('CBapp:problem_detail', id=id)
+
+    problem.description = mark_safe(markdown.markdown(problem.description, extensions=['fenced_code']))
+    official_solution = mark_safe(markdown.markdown(official_solution, extensions=['fenced_code']))
+
+    context = {
+        'problem': problem,
+        'user_solutions': user_solutions,
+        'other_solutions': other_solutions,
+        'official_solution': official_solution,
+        'solution_form': solution_form,
+    }
+    return render(request, 'developer/problem_detail.html', context)
+
 
 @login_required
 def edit_comment(request, comment_id):
@@ -241,3 +267,4 @@ def send_message(request):
         message.save()
         return redirect('CBapp:chat_page')
     return render(request, 'chat_page.html', {'form': form})
+
