@@ -56,3 +56,11 @@ class CC(models.Model):
     def __str__(self):
         return f"Tutorial ({self.language})"
 
+class Solution(models.Model):
+    problem = models.ForeignKey(CodeProblem, on_delete=models.CASCADE, related_name='solutions')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Solution by {self.user.username} for {self.problem.problem}"
