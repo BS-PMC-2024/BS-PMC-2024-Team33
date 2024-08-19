@@ -14,6 +14,7 @@ from .models import CodeProblem, Comment, Message, Tutorial, Solution
 def aboutus(request):
     return render(request, 'aboutus.html')
 
+
 @require_http_methods(["POST"])
 def delete_problem(request, problem_id):
     problem = get_object_or_404(CodeProblem, pk=problem_id)
@@ -21,6 +22,7 @@ def delete_problem(request, problem_id):
         problem.delete()
         return JsonResponse({'message': 'Problem deleted successfully.'}, status=204)
     return JsonResponse({'error': 'Unauthorized'}, status=403)
+
 
 def add_code_problem(request):
     if request.method == 'POST':
@@ -31,6 +33,7 @@ def add_code_problem(request):
     else:
         form = CodeProblemForm()
     return render(request, 'developer/addcodepage.html', {'form': form})
+
 
 @login_required
 def codepage(request):
@@ -84,11 +87,12 @@ def codepage(request):
     }
     return render(request, 'developer/codepage.html', context)
 
+
 @login_required
 def problem_detail(request, id):
     problem = get_object_or_404(CodeProblem, id=id)
-    user_solutions = Solution.objects.filter(problem=problem, user=request.user)  # Solutions by the current user
-    other_solutions = Solution.objects.filter(problem=problem).exclude(user=request.user)  # Solutions by others
+    user_solutions = Solution.objects.filter(problem=problem, user=request.user)
+    other_solutions = Solution.objects.filter(problem=problem).exclude(user=request.user)
     official_solution = problem.solution
 
     solution_form = SolutionForm()
@@ -99,6 +103,9 @@ def problem_detail(request, id):
             solution = solution_form.save(commit=False)
             solution.user = request.user
             solution.problem = problem
+            # Generate AI feedback
+            feedback = analyze_code(solution.content, problem.description, problem.language)
+            solution.feedback = feedback
             solution.save()
             return redirect('CBapp:problem_detail', id=id)
 
@@ -142,6 +149,7 @@ def edit_solution(request, problem_id):
     else:
         form = CodeProblemForm(instance=problem)
     return render(request, 'developer/edit_solution.html', {'form': form, 'problem': problem})
+
 
 @login_required
 def view_problems_for_student(request):
@@ -224,6 +232,7 @@ def chat_page(request):
     return render(request, 'chat_page.html',
                   {'messages': messages, 'form': form, 'user_has_new_messages': new_messages})
 
+
 @login_required
 def check_new_messages(request):
     if request.user.is_authenticated:
@@ -231,17 +240,17 @@ def check_new_messages(request):
         return JsonResponse({'new_messages': new_messages})
     return JsonResponse({'new_messages': False})
 
+
 @login_required
 def delete_comment(request, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
 
     # Check if the logged-in user is the comment's owner or an admin
-    if request.user == comment.user or request.user.groups.filter(name='Admin').exists():
+    if request.user == comment.user or request.user.is_staff:
         comment.delete()
         return JsonResponse({'message': 'Comment deleted successfully.'}, status=204)
 
     return JsonResponse({'error': 'You do not have permission to delete this comment.'}, status=403)
-
 
 
 @login_required
@@ -270,3 +279,49 @@ def send_message(request):
         return redirect('CBapp:chat_page')
     return render(request, 'chat_page.html', {'form': form})
 
+
+import openai
+from django.conf import settings
+
+# Ensure you have your OpenAI API key stored in Django settings
+openai.api_key = settings.OPENAI_API_KEY
+
+import openai
+from django.conf import settings
+
+
+def analyze_code(code, issue, language):
+    try:
+
+        openai.api_key = settings.OPENAI_API_KEY
+        content = f"""
+                Please check if the following code addresses the issue described below:
+                
+                Issue:
+                {issue}
+                
+                Language:
+                {language}
+                
+                Code:
+                {code}
+                
+                Additionally, analyze the code and provide detailed feedback on its correctness, efficiency, and potential improvements.
+                """
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are an expert code analyzer."},
+                {"role": "user", "content": content}
+            ])
+
+        # Extracting the response content
+        feedback = response['choices'][0]['message']['content']
+        print(feedback)
+
+        # Extract and return the feedback
+        return feedback
+
+    except Exception as e:
+        # Handle exceptions
+        return f"Error generating feedback: {str(e)}"
