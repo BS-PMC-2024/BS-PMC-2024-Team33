@@ -293,7 +293,7 @@ class ViewsTests(TestCase):
         self.assertTemplateUsed(response, 'developer/add_tutorial.html')
 
     def test_edit_tutorial_view(self):
-        tutorial = Tutorial.objects.create(title='Sample Tutorial', content='Tutorial Content', language='Python')
+        tutorial = Tutorial.objects.create(youtube_link='Sample Tutorial', medium_link='Tutorial Content',wikipedia_link='las;kd', language='Python')
         response = self.client.get(reverse('CBapp:edit_tutorial', args=[tutorial.id]))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'developer/edit_tutorial.html')
@@ -346,6 +346,204 @@ class IntegrationTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Problem 1')
         self.assertContains(response, 'Problem 2')
+
+
+class TutorialListDeveloperViewTest(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+
+        # Create a developer user and add them to the 'Developer' group
+        self.developer_user = User.objects.create_user(username='devuser', password='password')
+        developer_group = Group.objects.create(name='Developer')
+        self.developer_user.groups.add(developer_group)
+
+        # Create some tutorials with different languages and content
+        self.tutorial_python = Tutorial.objects.create(language='python', youtube_link='https://www.youtube.com/python',
+                                                       medium_link='', wikipedia_link='')
+        self.tutorial_java = Tutorial.objects.create(language='java', youtube_link='https://www.youtube.com/java',
+                                                     medium_link='', wikipedia_link='')
+        self.tutorial_c = Tutorial.objects.create(language='c', youtube_link='https://www.youtube.com/c',
+                                                  medium_link='', wikipedia_link='')
+
+    def test_tutorial_list_with_filter_python(self):
+        # Login as the developer user
+        self.client.login(username='devuser', password='password')
+
+        # Make a GET request with a language filter for Python
+        response = self.client.get(reverse('CBapp:tutorial_list_developer'), {'language': 'python'})
+
+        # Assert the response status code is 200 (OK)
+        self.assertEqual(response.status_code, 200)
+
+        # Assert the response contains the Python tutorial
+        self.assertContains(response, 'https://www.youtube.com/python')
+
+        # Assert the response does not contain the Java or C tutorial
+        self.assertNotContains(response, 'https://www.youtube.com/java')
+        self.assertNotContains(response, 'https://www.youtube.com/c')
+
+    def test_tutorial_list_with_filter_java(self):
+        # Login as the developer user
+        self.client.login(username='devuser', password='password')
+
+        # Make a GET request with a language filter for Java
+        response = self.client.get(reverse('CBapp:tutorial_list_developer'), {'language': 'java'})
+
+        # Assert the response status code is 200 (OK)
+        self.assertEqual(response.status_code, 200)
+
+        # Assert the response contains the Java tutorial
+        self.assertContains(response, 'https://www.youtube.com/java')
+
+        # Assert the response does not contain the Python or C tutorial
+        self.assertNotContains(response, 'https://www.youtube.com/python')
+        self.assertNotContains(response, 'https://www.youtube.com/c')
+
+
+class EditTutorialViewTest(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+
+        # Create a developer user and a tutorial to edit
+        self.developer_user = User.objects.create_user(username='devuser', password='password')
+
+        # Add the user to the 'Developer' group
+        developer_group = Group.objects.create(name='Developer')
+        self.developer_user.groups.add(developer_group)
+
+        # Create a tutorial
+        self.tutorial = Tutorial.objects.create(language='python', youtube_link='https://www.youtube.com/python')
+
+        # Login the user
+        self.client.login(username='devuser', password='password')
+
+    def test_edit_tutorial_get(self):
+        # Simulate a GET request to retrieve the edit form
+        response = self.client.get(reverse('CBapp:edit_tutorial', args=[self.tutorial.id]))
+
+        # Assert the response status code is 200 (OK)
+        self.assertEqual(response.status_code, 200)
+
+        # Assert the correct template is used
+        self.assertTemplateUsed(response, 'developer/edit_tutorial.html')
+
+        # Assert the form is pre-filled with the correct data
+        self.assertEqual(response.context['form'].instance, self.tutorial)
+
+    def test_edit_tutorial_post_valid_data(self):
+        # Simulate a POST request to edit the tutorial with valid data
+        response = self.client.post(reverse('CBapp:edit_tutorial', args=[self.tutorial.id]), {
+            'language': 'java',
+            'youtube_link': 'https://www.youtube.com/java',
+        })
+
+        # Assert the tutorial was successfully edited and redirected
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('CBapp:tutorial_list_developer'))
+
+        # Assert the tutorial was updated in the database
+        self.tutorial.refresh_from_db()
+        self.assertEqual(self.tutorial.language, 'java')
+        self.assertEqual(self.tutorial.youtube_link, 'https://www.youtube.com/java')
+
+    def test_edit_tutorial_post_invalid_data(self):
+        # Simulate a POST request with invalid data (e.g., missing required fields)
+        response = self.client.post(reverse('CBapp:edit_tutorial', args=[self.tutorial.id]), {
+            'language': '',  # Invalid because it's required
+            'youtube_link': 'https://www.youtube.com',
+        })
+
+        # Assert the response status code is 200 (form is re-rendered with errors)
+        self.assertEqual(response.status_code, 200)
+
+        # Assert the form contains errors
+        self.assertFormError(response, 'form', 'language', 'This field is required.')
+
+        # Assert the tutorial has not been updated in the database
+        self.tutorial.refresh_from_db()
+        self.assertEqual(self.tutorial.language, 'python')  # No change
+
+
+class AddTutorialViewTest(TestCase):
+
+    def setUp(self):
+        self.client = Client()
+
+        # Create a developer user
+        self.developer_user = User.objects.create_user(username='devuser', password='password')
+
+    def test_add_tutorial_post(self):
+        # Login as the developer user
+        self.client.login(username='devuser', password='password')
+
+        # Simulate a POST request to add a new tutorial
+        response = self.client.post(reverse('CBapp:add_tutorial'), {
+            'language': 'python',
+            'youtube_link': 'https://www.youtube.com',
+        })
+
+        # Assert the tutorial was successfully added and redirected
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('CBapp:tutorial_list_developer'))
+
+        # Assert that the tutorial exists in the database
+        self.assertEqual(Tutorial.objects.count(), 1)
+        self.assertEqual(Tutorial.objects.first().language, 'python')
+
+
+from django.test import TestCase, Client
+from django.urls import reverse
+from CBapp.models import Tutorial
+
+
+class TutorialListStudentViewTest(TestCase):
+
+    def setUp(self):
+        # Create a client instance
+        self.client = Client()
+
+        # Create some tutorials with different languages
+        Tutorial.objects.create(language='python', youtube_link='https://www.youtube.com/python')
+        Tutorial.objects.create(language='java', youtube_link='https://www.youtube.com/java')
+        Tutorial.objects.create(language='c', youtube_link='https://www.youtube.com/c')
+
+    def test_tutorial_list_without_filter(self):
+        # Simulate a GET request without any language filter
+        response = self.client.get(reverse('CBapp:tutorial_list_student'))
+
+        # Assert the response status code is 200
+        self.assertEqual(response.status_code, 200)
+        # Assert that all tutorials are listed in the context
+        self.assertEqual(len(response.context['tutorials']), 3)
+        # Assert the template used
+        self.assertTemplateUsed(response, 'student/tutorial_list.html')
+
+    def test_tutorial_list_with_filter_python(self):
+        # Simulate a GET request with a language filter for Python
+        response = self.client.get(reverse('CBapp:tutorial_list_student'), {'language': 'python'})
+
+        # Assert the response status code is 200
+        self.assertEqual(response.status_code, 200)
+        # Assert only the Python tutorial is listed in the context
+        self.assertEqual(len(response.context['tutorials']), 1)
+        self.assertEqual(response.context['tutorials'][0].language, 'python')
+        # Assert the selected language is set correctly in the context
+        self.assertEqual(response.context['selected_language'], 'python')
+
+    def test_tutorial_list_with_filter_java(self):
+        # Simulate a GET request with a language filter for Java
+        response = self.client.get(reverse('CBapp:tutorial_list_student'), {'language': 'java'})
+
+        # Assert the response status code is 200
+        self.assertEqual(response.status_code, 200)
+        # Assert only the Java tutorial is listed in the context
+        self.assertEqual(len(response.context['tutorials']), 1)
+        self.assertEqual(response.context['tutorials'][0].language, 'java')
+        # Assert the selected language is set correctly in the context
+        self.assertEqual(response.context['selected_language'], 'java')
+
 
 if __name__ == '__main__':
     unittest.main()
