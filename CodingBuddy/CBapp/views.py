@@ -3,12 +3,12 @@ import markdown
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User, Group
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_http_methods
 from .forms import CodeProblemForm, MessageForm, ProblemFilterForm, CommentForm, TutorialDeveloperForm, SolutionForm, CommentReplyForm
-from .models import CodeProblem, Comment, Message, Tutorial, Solution
+from .models import CodeProblem, Comment, Message, Tutorial, Solution, CommentReply
 
 
 def aboutus(request):
@@ -298,6 +298,19 @@ def add_comment_reply(request, comment_id):
 
     return redirect('CBapp:codepage')
 
+
+def delete_reply(request, reply_id):
+    reply = get_object_or_404(CommentReply, id=reply_id)
+
+    # Check if the user is an admin and the owner of the reply
+    if request.user.is_staff and request.user == reply.user:
+        if request.method == 'POST':
+            reply.delete()
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+        else:
+            return HttpResponseForbidden("You do not have permission to delete this reply.")
+    else:
+        return HttpResponseForbidden("You do not have permission to delete this reply.")
 
 @login_required
 @require_http_methods(["POST"])

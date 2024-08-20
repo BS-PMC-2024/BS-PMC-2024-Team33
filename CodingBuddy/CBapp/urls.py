@@ -28,4 +28,6 @@ urlpatterns = [
     path('add_comment/<int:problem_id>/', views.add_comment, name='add_comment'),  # Add this line
     path('send_message/', views.send_message, name='send_message'),  # Add this line
     path('add_comment_reply/<int:comment_id>/', views.add_comment_reply, name='add_comment_reply'),
+    path('delete_reply/<int:reply_id>/', views.delete_reply, name='delete_reply'),
+
 ]
