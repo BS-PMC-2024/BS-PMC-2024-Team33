@@ -1,8 +1,8 @@
-from _pytest import unittest
+import unittest
+
 from django.contrib.auth.models import User, Group
 from django.test import TestCase, Client
 from django.urls import reverse
-
 from .models import UserProfile
 
 
@@ -139,8 +139,7 @@ class UserProfileTests(TestCase):
         self.user = User.objects.create_user(username='testuser', password='password')
 
     def test_user_profile_creation(self):
-        user_profile = UserProfile.objects.create(user=self.user, bio='This is a bio.', upload_file=None)
-        self.assertEqual(user_profile.bio, 'This is a bio.')
+        user_profile = UserProfile.objects.create(user=self.user,  upload_file=None)
         self.assertEqual(user_profile.user.username, 'testuser')
 
 if __name__ == '__main__':

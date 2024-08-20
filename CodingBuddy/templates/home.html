@@ -126,11 +126,14 @@
   <div class="hero-title">
     Welcome To CodingBuddy!
   </div>
-  <div class="hero-image">
-    <div class="hero-overlay"></div>
-    <div class="hero-content">
-    </div>
+  <div class="video-section">
+  <div class="video-container">
+    <video controls autoplay>
+      <source src="{% static 'videos/BS-PMC-2024-Team33 – signup.html 2024-07-17 21-14-24.mp4' %}" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
   </div>
+</div>
 </div>
 
 <div class="jumbotron">
@@ -139,12 +142,5 @@
     <p>Get started by solving problems and learning through interactive tutorials.</p>
     <a class="btn-cta" href="/codepage">View our coding problems!</a>
 
-<div class="video-section">
-  <div class="video-container">
-    <video controls>
-      <source src="{% static 'videos/BS-PMC-2024-Team33 – signup.html 2024-07-17 21-14-24.mp4' %}" type="video/mp4">
-      Your browser does not support the video tag.
-    </video>
-  </div>
-</div>
+
 {% endblock %}

@@ -331,6 +331,40 @@ def delete_reply(request, reply_id):
 
 @login_required
 @require_http_methods(["POST"])
+def add_comment_reply(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+
+    if not request.user.is_staff:
+        return redirect('some_access_denied_page')  # Redirect or show an error page
+
+    if request.method == 'POST':
+        form = CommentReplyForm(request.POST)
+        if form.is_valid():
+            reply = form.save(commit=False)
+            reply.user = request.user
+            reply.comment = comment
+            reply.save()
+            return redirect('CBapp:codepage')  # Redirect back to the codepage or relevant page
+
+    return redirect('CBapp:codepage')
+
+
+def delete_reply(request, reply_id):
+    reply = get_object_or_404(CommentReply, id=reply_id)
+
+    # Check if the user is an admin and the owner of the reply
+    if request.user.is_staff and request.user == reply.user:
+        if request.method == 'POST':
+            reply.delete()
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+        else:
+            return HttpResponseForbidden("You do not have permission to delete this reply.")
+    else:
+        return HttpResponseForbidden("You do not have permission to delete this reply.")
+
+
+@login_required
+@require_http_methods(["POST"])
 def send_message(request):
     form = MessageForm(request.POST)
     if form.is_valid():

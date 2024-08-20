@@ -120,7 +120,8 @@
                     <a class="nav-link" href="{% url 'profile' %}">
                         <img alt="Profile" src="{% static 'home/images/profile-icon.png' %}"
                              style="width: 30px; height: 30px; border-radius: 50%;">
-                        Profile
+
+                        {{user.username}}
                         {% if user_has_new_messages %}
                         <span class="badge">New</span>
                         {% endif %}

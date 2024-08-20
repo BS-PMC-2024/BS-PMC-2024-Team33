@@ -5,6 +5,13 @@
 {% block extra_styles %}
     {{ block.super }}
     <style>
+         .feedback {
+            background-color: #e7f1ff;
+            border: 1px solid #d1e7fd;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
         .container {
             max-width: 900px;
             margin: 0 auto;
@@ -154,6 +161,12 @@
                     <div class="code-block">
                         <strong>Your Solution:</strong>
                         <pre>{{ solution.content|safe }}</pre>
+                        {% if solution.feedback %}
+                            <div class="feedback">
+                                <strong>AI Feedback:</strong>
+                                <p>{{ solution.feedback|safe }}</p>
+                            </div>
+                        {% endif %}
                     </div>
                 {% endfor %}
             {% else %}
@@ -166,12 +179,17 @@
                     <div class="code-block">
                         <strong>{{ solution.user.username }}'s Solution:</strong>
                         <pre>{{ solution.content|safe }}</pre>
+                        {% if solution.feedback %}
+                            <div class="feedback">
+                                <strong>AI Feedback:</strong>
+                                <p>{{ solution.feedback|safe }}</p>
+                            </div>
+                        {% endif %}
                     </div>
                 {% endfor %}
             {% else %}
                 <p>No other solutions submitted yet.</p>
             {% endif %}
-
         </div>
 
         <button onclick="location.href='{% url 'CBapp:codepage' %}'" class="back-button">Back to Problems</button>

@@ -121,6 +121,7 @@
             vertical-align: middle;
             margin-left: 5px;
         }
+
     </style>
 {% endblock %}
 
@@ -301,6 +302,7 @@
                                                     <button onclick="deleteComment('{{ comment.id }}')" class="delete-button">Delete</button>
                                                 {% endif %}
 
+
                                                 <div class="replies" style="margin-left: 20px;">
                                                     {% for reply in comment.replies.all %}
                                                         <div class="reply">
@@ -323,6 +325,7 @@
                                                         <textarea name="content" placeholder="Reply..." rows="2" class="form-control"></textarea>
                                                         <button type="submit" class="btn btn-secondary">Reply</button>
                                                     </form>
+
                                             </div>
                                         {% endfor %}
 
