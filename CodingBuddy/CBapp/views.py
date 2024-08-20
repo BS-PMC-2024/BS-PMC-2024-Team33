@@ -1,18 +1,22 @@
 import datetime
+
 import markdown
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User, Group
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_http_methods
-from .forms import CodeProblemForm, MessageForm, ProblemFilterForm, CommentForm, TutorialDeveloperForm, SolutionForm
-from .models import CodeProblem, Comment, Message, Tutorial, Solution
+
+from .forms import CodeProblemForm, MessageForm, ProblemFilterForm, CommentForm, TutorialDeveloperForm, SolutionForm, \
+    CommentReplyForm
+from .models import CodeProblem, Comment, Message, Tutorial, Solution, CommentReply
 
 
 def aboutus(request):
     return render(request, 'aboutus.html')
+
 
 @require_http_methods(["POST"])
 def delete_problem(request, problem_id):
@@ -21,6 +25,7 @@ def delete_problem(request, problem_id):
         problem.delete()
         return JsonResponse({'message': 'Problem deleted successfully.'}, status=204)
     return JsonResponse({'error': 'Unauthorized'}, status=403)
+
 
 def add_code_problem(request):
     if request.method == 'POST':
@@ -31,6 +36,7 @@ def add_code_problem(request):
     else:
         form = CodeProblemForm()
     return render(request, 'developer/addcodepage.html', {'form': form})
+
 
 @login_required
 def codepage(request):
@@ -50,6 +56,7 @@ def codepage(request):
             accepted_problems = accepted_problems.filter(language__icontains=language)
 
     comment_form = CommentForm()
+    reply_form = CommentReplyForm()
 
     if request.method == 'POST':
         comment_form = CommentForm(request.POST)
@@ -62,6 +69,16 @@ def codepage(request):
             comment.save()
             return redirect('CBapp:codepage')
 
+        reply_form = CommentReplyForm(request.POST)
+        if reply_form.is_valid():
+            comment_id = request.POST.get('comment_id')
+            comment = Comment.objects.get(id=comment_id)
+            reply = reply_form.save(commit=False)
+            reply.user = user
+            reply.comment = comment
+            reply.save()
+            return redirect('CBapp:codepage')
+
     problem_comments = {problem.id: problem.comments.all() for problem in code_problems}
 
     for problem in code_problems:
@@ -72,23 +89,17 @@ def codepage(request):
         problem.description = mark_safe(markdown.markdown(problem.description, extensions=['fenced_code']))
         problem.solution = mark_safe(markdown.markdown(problem.solution, extensions=['fenced_code']))
 
-    context = {
-        'is_developer': is_developer,
-        'is_student': is_student,
-        'code_problems': code_problems,
-        'accepted_problems': accepted_problems,
-        'form': form,
-        'is_staff': is_staff,
-        'problem_comments': problem_comments,
-        'comment_form': comment_form,
-    }
+    context = {'is_developer': is_developer, 'is_student': is_student, 'code_problems': code_problems,
+        'accepted_problems': accepted_problems, 'form': form, 'is_staff': is_staff,
+        'problem_comments': problem_comments, 'comment_form': comment_form, 'reply_form': reply_form, }
     return render(request, 'developer/codepage.html', context)
+
 
 @login_required
 def problem_detail(request, id):
     problem = get_object_or_404(CodeProblem, id=id)
-    user_solutions = Solution.objects.filter(problem=problem, user=request.user)  # Solutions by the current user
-    other_solutions = Solution.objects.filter(problem=problem).exclude(user=request.user)  # Solutions by others
+    user_solutions = Solution.objects.filter(problem=problem, user=request.user)
+    other_solutions = Solution.objects.filter(problem=problem).exclude(user=request.user)
     official_solution = problem.solution
 
     solution_form = SolutionForm()
@@ -99,19 +110,17 @@ def problem_detail(request, id):
             solution = solution_form.save(commit=False)
             solution.user = request.user
             solution.problem = problem
+            # Generate AI feedback
+            feedback = analyze_code(solution.content, problem.description, problem.language)
+            solution.feedback = feedback
             solution.save()
             return redirect('CBapp:problem_detail', id=id)
 
     problem.description = mark_safe(markdown.markdown(problem.description, extensions=['fenced_code']))
     official_solution = mark_safe(markdown.markdown(official_solution, extensions=['fenced_code']))
 
-    context = {
-        'problem': problem,
-        'user_solutions': user_solutions,
-        'other_solutions': other_solutions,
-        'official_solution': official_solution,
-        'solution_form': solution_form,
-    }
+    context = {'problem': problem, 'user_solutions': user_solutions, 'other_solutions': other_solutions,
+        'official_solution': official_solution, 'solution_form': solution_form, }
     return render(request, 'developer/problem_detail.html', context)
 
 
@@ -143,6 +152,7 @@ def edit_solution(request, problem_id):
         form = CodeProblemForm(instance=problem)
     return render(request, 'developer/edit_solution.html', {'form': form, 'problem': problem})
 
+
 @login_required
 def view_problems_for_student(request):
     accepted_problems = CodeProblem.objects.filter(status='accepted')
@@ -162,11 +172,7 @@ def tutorial_list_developer(request):
     is_developer = user.groups.filter(name='Developer').exists()
     is_staff = user.is_staff
     tutorials = Tutorial.objects.all()
-    context = {
-        'is_developer': is_developer,
-        'is_staff': is_staff,
-        'tutorials': tutorials
-    }
+    context = {'is_developer': is_developer, 'is_staff': is_staff, 'tutorials': tutorials}
     return render(request, 'developer/tutorial_list.html', context)
 
 
@@ -224,6 +230,7 @@ def chat_page(request):
     return render(request, 'chat_page.html',
                   {'messages': messages, 'form': form, 'user_has_new_messages': new_messages})
 
+
 @login_required
 def check_new_messages(request):
     if request.user.is_authenticated:
@@ -231,15 +238,17 @@ def check_new_messages(request):
         return JsonResponse({'new_messages': new_messages})
     return JsonResponse({'new_messages': False})
 
+
 @login_required
 def delete_comment(request, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
-    if request.user == comment.user:
+
+    # Check if the logged-in user is the comment's owner or an admin
+    if request.user == comment.user or request.user.is_staff:
         comment.delete()
         return JsonResponse({'message': 'Comment deleted successfully.'}, status=204)
+
     return JsonResponse({'error': 'You do not have permission to delete this comment.'}, status=403)
-
-
 
 
 @login_required
@@ -255,6 +264,70 @@ def add_comment(request, problem_id):
         return redirect('CBapp:codepage')
     return render(request, 'developer/codepage.html', {'form': form})
 
+@login_required
+@require_http_methods(["POST"])
+def add_comment_reply(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+
+    if not request.user.is_staff:
+        return redirect('some_access_denied_page')  # Redirect or show an error page
+
+    if request.method == 'POST':
+        form = CommentReplyForm(request.POST)
+        if form.is_valid():
+            reply = form.save(commit=False)
+            reply.user = request.user
+            reply.comment = comment
+            reply.save()
+            return redirect('CBapp:codepage')  # Redirect back to the codepage or relevant page
+
+    return redirect('CBapp:codepage')
+
+
+def delete_reply(request, reply_id):
+    reply = get_object_or_404(CommentReply, id=reply_id)
+
+    # Check if the user is an admin and the owner of the reply
+    if request.user.is_staff and request.user == reply.user:
+        if request.method == 'POST':
+            reply.delete()
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+        else:
+            return HttpResponseForbidden("You do not have permission to delete this reply.")
+    else:
+        return HttpResponseForbidden("You do not have permission to delete this reply.")
+
+@login_required
+@require_http_methods(["POST"])
+def add_comment_reply(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+
+
+    if request.method == 'POST':
+        form = CommentReplyForm(request.POST)
+        if form.is_valid():
+            reply = form.save(commit=False)
+            reply.user = request.user
+            reply.comment = comment
+            reply.save()
+            return redirect('CBapp:codepage')  # Redirect back to the codepage or relevant page
+
+    return redirect('CBapp:codepage')
+
+
+def delete_reply(request, reply_id):
+    reply = get_object_or_404(CommentReply, id=reply_id)
+
+    # Check if the user is an admin and the owner of the reply
+    if request.user.is_staff and request.user == reply.user:
+        if request.method == 'POST':
+            reply.delete()
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+        else:
+            return HttpResponseForbidden("You do not have permission to delete this reply.")
+    else:
+        return HttpResponseForbidden("You do not have permission to delete this reply.")
+
 
 @login_required
 @require_http_methods(["POST"])
@@ -268,3 +341,46 @@ def send_message(request):
         return redirect('CBapp:chat_page')
     return render(request, 'chat_page.html', {'form': form})
 
+
+import openai
+from django.conf import settings
+
+# Ensure you have your OpenAI API key stored in Django settings
+openai.api_key = settings.OPENAI_API_KEY
+
+import openai
+from django.conf import settings
+
+
+def analyze_code(code, issue, language):
+    try:
+
+        openai.api_key = settings.OPENAI_API_KEY
+        content = f"""
+                Please check if the following code addresses the issue described below:
+
+                Issue:
+                {issue}
+
+                Language:
+                {language}
+
+                Code:
+                {code}
+
+                Additionally, analyze the code and provide detailed feedback on its correctness, efficiency, and potential improvements.
+                """
+        response = openai.ChatCompletion.create(model="gpt-3.5-turbo",
+            messages=[{"role": "system", "content": "You are an expert code analyzer."},
+                {"role": "user", "content": content}])
+
+        # Extracting the response content
+        feedback = response['choices'][0]['message']['content']
+        print(feedback)
+
+        # Extract and return the feedback
+        return feedback
+
+    except Exception as e:
+        # Handle exceptions
+        return f"Error generating feedback: {str(e)}"

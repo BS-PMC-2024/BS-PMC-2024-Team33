@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Home | Coding Problems{% endblock %}
 
@@ -20,28 +21,15 @@
             overflow: hidden;
             max-width: 100%;
         }
-        .code-block {
-            background-color: #f5f5f5;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 10px;
-            font-family: 'Courier New', Courier, monospace;
-            white-space: pre-wrap;
-            overflow-x: auto;
-            max-height: 100px;
-            position: relative;
-            transition: all 0.3s ease-in-out;
-            width: 100%;
+        .code-block, .comments, .edit-button, .delete-button, .show-more, .solution-block {
+            display: none;
+            margin-top: 10px;
         }
-        .code-block.expanded {
-            max-height: none;
-            width: auto;
-        }
-        .card.expanded {
-            max-width: none;
+        .expanded .code-block, .expanded .comments, .expanded .edit-button, .expanded .delete-button, .expanded .solution-block {
+            display: block;
         }
         .show-more {
-            background-color: #007bff;
+            background-color: #008000;
             color: #fff;
             border: none;
             padding: 5px 10px;
@@ -103,6 +91,36 @@
             padding-left: 15px;
             box-sizing: border-box;
         }
+        .comment {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .reply {
+            margin-bottom: 5px;
+            padding: 8px;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .comment-actions {
+            margin-top: 10px;
+        }
+        .reply-input {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .language-icon {
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
     </style>
 {% endblock %}
 
@@ -110,53 +128,115 @@
     <div class="container">
         {% if is_developer or is_staff %}
             <h1>DEVELOPER ACCESS</h1>
-        <a class="btn btn-primary btn-lg mb-4" href="{% url 'CBapp:add_code_problem' %}" role="button">Add Code Problem</a>
+            <a class="btn btn-primary btn-lg mb-4" href="{% url 'CBapp:add_code_problem' %}" role="button">Add Code Problem</a>
 
             {% if code_problems %}
                 <div class="row">
                     {% for problem in code_problems %}
                         <div class="col-md-4">
-                            <div class="code-problem">
+                            <div class="code-problem" id="problem-{{ problem.id }}">
                                 <h2><a href="{% url 'CBapp:problem_detail' problem.id %}">{{ problem.problem }}</a></h2>
-                                <div class="code-block" id="description-{{ problem.id }}">
-                                    {{ problem.description|safe }}
+                                <button class="show-more" onclick="toggleShowMore('problem-{{ problem.id }}')">Show more</button>
+
+                                <div class="solution-block">
+                                    <div class="code-block">
+                                        {{ problem.description|safe }}
+                                    </div>
+                                    <div class="code-block">
+                                        {{ problem.solution|safe }}
+                                    </div>
+
+                                    <!-- Display comments (initially hidden) -->
+                                    <div class="comments">
+                                        <h3>Comments</h3>
+                                        {% for comment in problem.comments.all %}
+                                            <div class="comment">
+                                                <strong>{{ comment.user.username }}</strong>: {{ comment.content }}
+                                                <p><em>{{ comment.created_at }}</em></p>
+                                                {% if request.user == comment.user and is_developer %}
+                                                    <button onclick="showEditForm({{ comment.id }})" class="edit-button">Edit</button>
+
+                                                    <!-- Edit form (initially hidden) -->
+                                                    <form id="edit-form-{{ comment.id }}" method="post" action="{% url 'CBapp:edit_comment' comment.id %}" style="display:none;">
+                                                        {% csrf_token %}
+                                                        <textarea name="content" class="form-control">{{ comment.content }}</textarea>
+                                                        <button type="submit" class="btn btn-primary">Update Comment</button>
+                                                    </form>
+                                                {% endif %}
+
+                                                {% if request.user == comment.user and is_staff %}
+                                                    <!-- Edit and Delete buttons for admin only -->
+                                                    <div class="comment-actions">
+                                                        <button onclick="showEditForm({{ comment.id }})" class="edit-button">Edit</button>
+                                                        <form id="edit-form-{{ comment.id }}" method="post" action="{% url 'CBapp:edit_comment' comment.id %}" style="display:none;">
+                                                            {% csrf_token %}
+                                                            <textarea name="content" class="form-control">{{ comment.content }}</textarea>
+                                                            <button type="submit" class="btn btn-primary">Update Comment</button>
+                                                        </form>
+                                                    </div>
+                                                {% endif %}
+
+                                                {% if request.user.is_staff %}
+                                                    <!-- Delete button for admin only -->
+                                                    <button onclick="deleteComment('{{ comment.id }}')" class="delete-button">Delete</button>
+                                                {% endif %}
+
+                                                {% if request.user == comment.user and is_developer %}
+                                                    <button onclick="deleteComment('{{ comment.id }}')" class="delete-button">Delete</button>
+                                                {% endif %}
+
+                                                <!-- Display replies -->
+                                                {% if comment.replies.all %}
+                                                    <div class="replies" style="margin-left: 20px;">
+                                                        {% for reply in comment.replies.all %}
+                                                            <div class="reply">
+                                                                <strong>{{ reply.user.username }}</strong>: {{ reply.content }}
+                                                                <p><em>{{ reply.created_at }}</em></p>
+                                                                {% if user == reply.user %}
+                                                                    <form action="{% url 'CBapp:delete_reply' reply.id %}" method="post" style="display:inline;">
+                                                                        {% csrf_token %}
+                                                                        <button type="submit" class="delete-button">Delete Reply</button>
+                                                                    </form>
+                                                                {% endif %}
+                                                            </div>
+                                                        {% empty %}
+                                                            <p>No replies yet.</p>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% else %}
+                                                    <p>No replies yet.</p>
+                                                {% endif %}
+                                                    <!-- Reply  -->
+                                                    <form action="{% url 'CBapp:add_comment_reply' comment.id %}" method="post" class="reply-input">
+                                                        {% csrf_token %}
+                                                        <textarea name="content" placeholder="Reply..." rows="2" class="form-control"></textarea>
+                                                        <button type="submit" class="btn btn-secondary">Reply</button>
+                                                    </form>
+                                            </div>
+                                        {% endfor %}
+
+                                        <!-- Add new comment (now inside comments section) -->
+                                        <form method="post" action="{% url 'CBapp:codepage' %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="problem_id" value="{{ problem.id }}">
+                                            <textarea name="content" class="form-control" rows="3"></textarea>
+                                            <button type="submit" class="btn btn-secondary">Add Comment</button>
+                                        </form>
+                                    </div>
                                 </div>
-                                <button class="show-more" onclick="toggleShowMore('description-{{ problem.id }}', this)">Show more</button>
-                                <div class="code-block" id="solution-{{ problem.id }}">
-                                    {{ problem.solution|safe }}
-                                </div>
-                                <button class="show-more" onclick="toggleShowMore('solution-{{ problem.id }}', this)">Show more</button>
+
                                 <button onclick="window.location.href='{% url 'CBapp:edit_solution' problem.id %}'" class="edit-button">Edit Solution</button>
                                 <button onclick="deleteProblem('{{ problem.id }}')" class="delete-button">Delete</button>
 
-                                <!-- Display comments -->
-                                <div class="comments">
-                                    <h3>Comments</h3>
-                                    {% for comment in problem.comments.all %}
-                                        <div class="comment">
-                                            <strong>{{ comment.user.username }}</strong>: {{ comment.content }}
-                                            <p><em>{{ comment.created_at }}</em></p>
-                                            {% if comment.user == request.user %}
-                                                <button onclick="showEditForm({{ comment.id }})" class="edit-button">Edit</button>
-                                                <!-- Edit comment form (initially hidden) -->
-                                                <form id="edit-form-{{ comment.id }}" method="post" action="{% url 'CBapp:edit_comment' comment.id %}" style="display:none;">
-                                                    {% csrf_token %}
-                                                    <textarea name="content" class="form-control">{{ comment.content }}</textarea>
-                                                    <button type="submit" class="btn btn-primary">Update Comment</button>
-                                                </form>
-                                                <button onclick="deleteComment('{{ comment.id }}')" class="delete-button">Delete</button>
-                                            {% endif %}
-                                        </div>
-                                    {% endfor %}
-                                </div>
-
-                                <!-- Add new comment -->
-                                <form method="post" action="{% url 'CBapp:codepage' %}">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="problem_id" value="{{ problem.id }}">
-                                    <textarea name="content" class="form-control" rows="3"></textarea>
-                                    <button type="submit" class="btn btn-secondary">Add Comment</button>
-                                </form>
+                                <p><strong>Language:</strong> {{ problem.language }}
+                                    {% if problem.language == "Python" %}
+                                        <img src="{% static 'home/images/python_icon.png' %}" alt="Python" class="language-icon">
+                                    {% elif problem.language == "Java" %}
+                                        <img src="{% static 'home/images/java_icon.png' %}" alt="Java" class="language-icon">
+                                    {% elif problem.language == "C++" %}
+                                        <img src="{% static 'home/images/cpp_icon.png' %}" alt="C++" class="language-icon">
+                                    {% endif %}
+                                </p>
                             </div>
                         </div>
                     {% endfor %}
@@ -179,18 +259,29 @@
                 {% if accepted_problems %}
                     {% for problem in accepted_problems %}
                         <div class="col-md-4">
-                            <div class="card">
+                            <div class="card" id="problem-{{ problem.id }}">
                                 <div class="card-body">
                                     <h2><a href="{% url 'CBapp:problem_detail' problem.id %}">{{ problem.problem }}</a></h2>
-                                    <div class="code-block" id="description-{{ problem.id }}">
-                                        {{ problem.description|safe }}
+                                    <button class="show-more" onclick="toggleShowMore('problem-{{ problem.id }}')">Show more</button>
+
+                                    <div class="solution-block">
+                                        <div class="code-block">
+                                            {{ problem.description|safe }}
+                                        </div>
+                                        <div class="code-block">
+                                            {{ problem.solution|safe }}
+                                        </div>
                                     </div>
-                                    <button class="show-more" onclick="toggleShowMore('description-{{ problem.id }}', this)">Show more</button>
-                                    <div class="code-block" id="solution-{{ problem.id }}">
-                                        {{ problem.solution|safe }}
-                                    </div>
-                                    <button class="show-more" onclick="toggleShowMore('solution-{{ problem.id }}', this)">Show more</button>
-                                    <p><strong>Language:</strong> {{ problem.language }}</p>
+
+                                    <p><strong>Language:</strong> {{ problem.language }}
+                                        {% if problem.language == "Python" %}
+                                            <img src="{% static 'home/images/python_icon.png' %}" alt="Python" class="language-icon">
+                                        {% elif problem.language == "Java" %}
+                                            <img src="{% static 'home/images/java_icon.png' %}" alt="Java" class="language-icon">
+                                        {% elif problem.language == "C++" %}
+                                            <img src="{% static 'home/images/cpp_icon.png' %}" alt="C++" class="language-icon">
+                                        {% endif %}
+                                    </p>
 
                                     <!-- Display comments -->
                                     <div class="comments">
@@ -209,17 +300,40 @@
                                                     </form>
                                                     <button onclick="deleteComment('{{ comment.id }}')" class="delete-button">Delete</button>
                                                 {% endif %}
+
+                                                <div class="replies" style="margin-left: 20px;">
+                                                    {% for reply in comment.replies.all %}
+                                                        <div class="reply">
+                                                            <strong>{{ reply.user.username }}</strong>: {{ reply.content }}
+                                                            <p><em>{{ reply.created_at }}</em></p>
+                                                            {% if user == reply.user %}
+                                                                <form action="{% url 'CBapp:delete_reply' reply.id %}" method="post" style="display:inline;">
+                                                                    {% csrf_token %}
+                                                                    <button type="submit" class="delete-button">Delete Reply</button>
+                                                                </form>
+                                                            {% endif %}
+                                                        </div>
+                                                    {% empty %}
+                                                        <p>No replies yet.</p>
+                                                    {% endfor %}
+                                                </div>
+
+                                                    <form action="{% url 'CBapp:add_comment_reply' comment.id %}" method="post" class="reply-input">
+                                                        {% csrf_token %}
+                                                        <textarea name="content" placeholder="Reply..." rows="2" class="form-control"></textarea>
+                                                        <button type="submit" class="btn btn-secondary">Reply</button>
+                                                    </form>
                                             </div>
                                         {% endfor %}
-                                    </div>
 
-                                    <!-- Add new comment -->
-                                    <form method="post" action="{% url 'CBapp:codepage' %}">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="problem_id" value="{{ problem.id }}">
-                                        <textarea name="content" class="form-control" rows="3"></textarea>
-                                        <button type="submit" class="btn btn-secondary">Add Comment</button>
-                                    </form>
+                                        <!-- Add new comment -->
+                                        <form method="post" action="{% url 'CBapp:codepage' %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="problem_id" value="{{ problem.id }}">
+                                            <textarea name="content" class="form-control" rows="3"></textarea>
+                                            <button type="submit" class="btn btn-secondary">Add Comment</button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -234,17 +348,19 @@
         {% endif %}
     </div>
     <script>
-        function toggleShowMore(id, button) {
-            var codeBlock = document.getElementById(id);
-            var card = codeBlock.closest('.code-problem, .card');
+        function toggleShowMore(problemId) {
+            var problemCard = document.getElementById(problemId);
+            problemCard.classList.toggle('expanded');
 
-            codeBlock.classList.toggle('expanded');
-            card.classList.toggle('expanded');
+            var button = problemCard.querySelector('.show-more');
+            var comments = problemCard.querySelector('.comments');
 
-            if (codeBlock.classList.contains('expanded')) {
+            if (problemCard.classList.contains('expanded')) {
                 button.textContent = 'Show less';
+                comments.style.display = 'block'; // Show comments and add comment form
             } else {
                 button.textContent = 'Show more';
+                comments.style.display = 'none'; // Hide comments and add comment form
             }
         }
 
