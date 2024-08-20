@@ -11,17 +11,19 @@
     .form-label {
         font-weight: bold;
     }
-    .CodeMirror {
-        min-height: 200px;
-        font-size: 14px;
-        max-height: 300px;
-        overflow-y: auto;
-    }
+    /* Ensure the textarea takes full width and handles overflow */
     textarea {
-        height: 300px;      /* Set a fixed height */
-        overflow-y: auto;   /* Enable vertical scroll */
-        width: 100%;        /* Full width */
-        resize: vertical;   /* Allow manual vertical resizing */
+        height: 300px;        /* Set a fixed height */
+        overflow-y: auto;    /* Enable vertical scrolling */
+        width: 100%;          /* Full width */
+        box-sizing: border-box; /* Include padding and border in the total width and height */
+        resize: vertical;     /* Allow manual vertical resizing */
+        padding: 10px;        /* Optional: Add padding for better text appearance */
+    }
+    /* Ensure that SimpleMDE styling doesn't interfere */
+    .CodeMirror {
+        height: 300px;        /* Set the height for the editor */
+<!--        overflow-y: auto;    /* Enable vertical scrolling */-->
     }
 </style>
 {% endblock %}
