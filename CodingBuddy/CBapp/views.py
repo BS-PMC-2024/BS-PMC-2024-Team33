@@ -1,4 +1,5 @@
 import datetime
+
 import markdown
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User, Group
@@ -7,7 +8,9 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_http_methods
-from .forms import CodeProblemForm, MessageForm, ProblemFilterForm, CommentForm, TutorialDeveloperForm, SolutionForm, CommentReplyForm
+
+from .forms import CodeProblemForm, MessageForm, ProblemFilterForm, CommentForm, TutorialDeveloperForm, SolutionForm, \
+    CommentReplyForm
 from .models import CodeProblem, Comment, Message, Tutorial, Solution, CommentReply
 
 
@@ -56,25 +59,25 @@ def codepage(request):
     reply_form = CommentReplyForm()
 
     if request.method == 'POST':
-            comment_form = CommentForm(request.POST)
-            if comment_form.is_valid():
-                problem_id = request.POST.get('problem_id')
-                problem = CodeProblem.objects.get(id=problem_id)
-                comment = comment_form.save(commit=False)
-                comment.user = user
-                comment.problem = problem
-                comment.save()
-                return redirect('CBapp:codepage')
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid():
+            problem_id = request.POST.get('problem_id')
+            problem = CodeProblem.objects.get(id=problem_id)
+            comment = comment_form.save(commit=False)
+            comment.user = user
+            comment.problem = problem
+            comment.save()
+            return redirect('CBapp:codepage')
 
-            reply_form = CommentReplyForm(request.POST)
-            if reply_form.is_valid():
-                comment_id = request.POST.get('comment_id')
-                comment = Comment.objects.get(id=comment_id)
-                reply = reply_form.save(commit=False)
-                reply.user = user
-                reply.comment = comment
-                reply.save()
-                return redirect('CBapp:codepage')
+        reply_form = CommentReplyForm(request.POST)
+        if reply_form.is_valid():
+            comment_id = request.POST.get('comment_id')
+            comment = Comment.objects.get(id=comment_id)
+            reply = reply_form.save(commit=False)
+            reply.user = user
+            reply.comment = comment
+            reply.save()
+            return redirect('CBapp:codepage')
 
     problem_comments = {problem.id: problem.comments.all() for problem in code_problems}
 
@@ -86,17 +89,9 @@ def codepage(request):
         problem.description = mark_safe(markdown.markdown(problem.description, extensions=['fenced_code']))
         problem.solution = mark_safe(markdown.markdown(problem.solution, extensions=['fenced_code']))
 
-    context = {
-        'is_developer': is_developer,
-        'is_student': is_student,
-        'code_problems': code_problems,
-        'accepted_problems': accepted_problems,
-        'form': form,
-        'is_staff': is_staff,
-        'problem_comments': problem_comments,
-        'comment_form': comment_form,
-        'reply_form': reply_form,
-    }
+    context = {'is_developer': is_developer, 'is_student': is_student, 'code_problems': code_problems,
+        'accepted_problems': accepted_problems, 'form': form, 'is_staff': is_staff,
+        'problem_comments': problem_comments, 'comment_form': comment_form, 'reply_form': reply_form, }
     return render(request, 'developer/codepage.html', context)
 
 
@@ -124,13 +119,8 @@ def problem_detail(request, id):
     problem.description = mark_safe(markdown.markdown(problem.description, extensions=['fenced_code']))
     official_solution = mark_safe(markdown.markdown(official_solution, extensions=['fenced_code']))
 
-    context = {
-        'problem': problem,
-        'user_solutions': user_solutions,
-        'other_solutions': other_solutions,
-        'official_solution': official_solution,
-        'solution_form': solution_form,
-    }
+    context = {'problem': problem, 'user_solutions': user_solutions, 'other_solutions': other_solutions,
+        'official_solution': official_solution, 'solution_form': solution_form, }
     return render(request, 'developer/problem_detail.html', context)
 
 
@@ -182,11 +172,7 @@ def tutorial_list_developer(request):
     is_developer = user.groups.filter(name='Developer').exists()
     is_staff = user.is_staff
     tutorials = Tutorial.objects.all()
-    context = {
-        'is_developer': is_developer,
-        'is_staff': is_staff,
-        'tutorials': tutorials
-    }
+    context = {'is_developer': is_developer, 'is_staff': is_staff, 'tutorials': tutorials}
     return render(request, 'developer/tutorial_list.html', context)
 
 
@@ -312,6 +298,7 @@ def delete_reply(request, reply_id):
     else:
         return HttpResponseForbidden("You do not have permission to delete this reply.")
 
+
 @login_required
 @require_http_methods(["POST"])
 def send_message(request):
@@ -353,12 +340,9 @@ def analyze_code(code, issue, language):
 
                 Additionally, analyze the code and provide detailed feedback on its correctness, efficiency, and potential improvements.
                 """
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are an expert code analyzer."},
-                {"role": "user", "content": content}
-            ])
+        response = openai.ChatCompletion.create(model="gpt-3.5-turbo",
+            messages=[{"role": "system", "content": "You are an expert code analyzer."},
+                {"role": "user", "content": content}])
 
         # Extracting the response content
         feedback = response['choices'][0]['message']['content']
