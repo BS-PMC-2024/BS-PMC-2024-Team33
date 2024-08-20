@@ -163,12 +163,12 @@
                                             {% if request.user == comment.user and is_developer %}
                                                 <button onclick="showEditForm({{ comment.id }})" class="edit-button">Edit</button>
 
-                                                  <!-- Edit form (initially hidden) -->
+                                                <!-- Edit form (initially hidden) -->
                                                 <form id="edit-form-{{ comment.id }}" method="post" action="{% url 'CBapp:edit_comment' comment.id %}" style="display:none;">
-                                                 {% csrf_token %}
-                                                  <textarea name="content" class="form-control">{{ comment.content }}</textarea>
-                                                     <button type="submit" class="btn btn-primary">Update Comment</button>
-                                                         </form>
+                                                    {% csrf_token %}
+                                                    <textarea name="content" class="form-control">{{ comment.content }}</textarea>
+                                                    <button type="submit" class="btn btn-primary">Update Comment</button>
+                                                </form>
                                             {% endif %}
 
                                             {% if request.user == comment.user and is_staff %}
@@ -184,7 +184,7 @@
                                             {% endif %}
 
                                             {% if request.user.is_staff %}
-                                                 <!-- Delete button for admin only -->
+                                                <!-- Delete button for admin only -->
                                                 <button onclick="deleteComment('{{ comment.id }}')" class="delete-button">Delete</button>
                                             {% endif %}
 
@@ -192,13 +192,19 @@
                                                 <button onclick="deleteComment('{{ comment.id }}')" class="delete-button">Delete</button>
                                             {% endif %}
 
-
                                             <!-- Display replies -->
                                             {% if comment.replies.all %}
                                                 <div class="replies" style="margin-left: 20px;">
                                                     {% for reply in comment.replies.all %}
                                                         <div class="reply">
                                                             <strong>{{ reply.user.username }}</strong>: {{ reply.content }}
+                                                            <p><em>{{ reply.created_at }}</em></p>
+                                                            {% if user == reply.user %}
+                                                                <form action="{% url 'CBapp:delete_reply' reply.id %}" method="post" style="display:inline;">
+                                                                    {% csrf_token %}
+                                                                    <button type="submit" class="delete-button">Delete Reply</button>
+                                                                </form>
+                                                            {% endif %}
                                                         </div>
                                                     {% empty %}
                                                         <p>No replies yet.</p>
@@ -285,6 +291,13 @@
                                                         {% for reply in comment.replies.all %}
                                                             <div class="reply">
                                                                 <strong>{{ reply.user.username }}</strong>: {{ reply.content }}
+                                                                <p><em>{{ reply.created_at }}</em></p>
+                                                                {% if user == reply.user %}
+                                                                    <form action="{% url 'CBapp:delete_reply' reply.id %}" method="post" style="display:inline;">
+                                                                        {% csrf_token %}
+                                                                        <button type="submit" class="delete-button">Delete Reply</button>
+                                                                    </form>
+                                                                {% endif %}
                                                             </div>
                                                         {% empty %}
                                                             <p>No replies yet.</p>
