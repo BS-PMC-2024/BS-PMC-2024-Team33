@@ -103,6 +103,30 @@
             padding-left: 15px;
             box-sizing: border-box;
         }
+        .comment {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .reply {
+            margin-bottom: 5px;
+            padding: 8px;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .comment-actions {
+            margin-top: 10px;
+        }
+        .reply-input {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
     </style>
 {% endblock %}
 
@@ -110,7 +134,7 @@
     <div class="container">
         {% if is_developer or is_staff %}
             <h1>DEVELOPER ACCESS</h1>
-        <a class="btn btn-primary btn-lg mb-4" href="{% url 'CBapp:add_code_problem' %}" role="button">Add Code Problem</a>
+            <a class="btn btn-primary btn-lg mb-4" href="{% url 'CBapp:add_code_problem' %}" role="button">Add Code Problem</a>
 
             {% if code_problems %}
                 <div class="row">
@@ -137,34 +161,58 @@
                                             <strong>{{ comment.user.username }}</strong>: {{ comment.content }}
                                             <p><em>{{ comment.created_at }}</em></p>
                                             {% if request.user == comment.user and is_developer %}
-    <!-- Edit button for the comment's author -->
-    <button onclick="showEditForm({{ comment.id }})" class="edit-button">Edit</button>
+                                                <  !-- Edit button for the comment's author -->
+                                                <button onclick="showEditForm({{ comment.id }})" class="edit-button">Edit</button>
 
-    <!-- Edit form (initially hidden) -->
-    <form id="edit-form-{{ comment.id }}" method="post" action="{% url 'CBapp:edit_comment' comment.id %}" style="display:none;">
-        {% csrf_token %}
-        <textarea name="content" class="form-control">{{ comment.content }}</textarea>
-        <button type="submit" class="btn btn-primary">Update Comment</button>
-    </form>
-{% endif %}
+                                                  <!-- Edit form (initially hidden) -->
+                                                <form id="edit-form-{{ comment.id }}" method="post" action="{% url 'CBapp:edit_comment' comment.id %}" style="display:none;">
+                                                 {% csrf_token %}
+                                                  <textarea name="content" class="form-control">{{ comment.content }}</textarea>
+                                                     <button type="submit" class="btn btn-primary">Update Comment</button>
+                                                         </form>
+                                            {% endif %}
 
                                             {% if request.user == comment.user and is_staff %}
-    <!-- Edit button for the comment's author -->
-    <button onclick="showEditForm({{ comment.id }})" class="edit-button">Edit</button>
+                                                <!-- Edit and Delete buttons for admin only -->
+                                                <div class="comment-actions">
+                                                    <button onclick="showEditForm({{ comment.id }})" class="edit-button">Edit</button>
+                                                    <form id="edit-form-{{ comment.id }}" method="post" action="{% url 'CBapp:edit_comment' comment.id %}" style="display:none;">
+                                                        {% csrf_token %}
+                                                        <textarea name="content" class="form-control">{{ comment.content }}</textarea>
+                                                        <button type="submit" class="btn btn-primary">Update Comment</button>
+                                                    </form>
+                                                </div>
+                                            {% endif %}
 
-    <!-- Edit form (initially hidden) -->
-    <form id="edit-form-{{ comment.id }}" method="post" action="{% url 'CBapp:edit_comment' comment.id %}" style="display:none;">
-        {% csrf_token %}
-        <textarea name="content" class="form-control">{{ comment.content }}</textarea>
-        <button type="submit" class="btn btn-primary">Update Comment</button>
-    </form>
-{% endif %}
+                                            {% if request.user.is_staff %}
+                                                 <!-- Delete button for admin only -->
+                                                <button onclick="deleteComment('{{ comment.id }}')" class="delete-button">Delete</button>
+                                            {% endif %}
 
-{% if request.user.is_staff %}
-    <!-- Delete button for admin only -->
-    <button onclick="deleteComment('{{ comment.id }}')" class="delete-button">Delete</button>
-{% endif %}
 
+                                            <!-- Display replies -->
+                                            {% if comment.replies.all %}
+                                                <div class="replies" style="margin-left: 20px;">
+                                                    {% for reply in comment.replies.all %}
+                                                        <div class="reply">
+                                                            <strong>{{ reply.user.username }}</strong>: {{ reply.content }}
+                                                        </div>
+                                                    {% empty %}
+                                                        <p>No replies yet.</p>
+                                                    {% endfor %}
+                                                </div>
+                                            {% else %}
+                                                <p>No replies yet.</p>
+                                            {% endif %}
+
+                                            {% if user.is_staff %}
+                                                <!-- Reply input for admin only -->
+                                                <form action="{% url 'CBapp:add_comment_reply' comment.id %}" method="post" class="reply-input">
+                                                    {% csrf_token %}
+                                                    <textarea name="content" placeholder="Reply..." rows="2" class="form-control"></textarea>
+                                                    <button type="submit" class="btn btn-secondary">Reply</button>
+                                                </form>
+                                            {% endif %}
                                         </div>
                                     {% endfor %}
                                 </div>
@@ -227,6 +275,29 @@
                                                         <button type="submit" class="btn btn-primary">Update Comment</button>
                                                     </form>
                                                     <button onclick="deleteComment('{{ comment.id }}')" class="delete-button">Delete</button>
+                                                {% endif %}
+                                                <!-- Display replies -->
+                                                {% if comment.replies.all %}
+                                                    <div class="replies" style="margin-left: 20px;">
+                                                        {% for reply in comment.replies.all %}
+                                                            <div class="reply">
+                                                                <strong>{{ reply.user.username }}</strong>: {{ reply.content }}
+                                                            </div>
+                                                        {% empty %}
+                                                            <p>No replies yet.</p>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% else %}
+                                                    <p>No replies yet.</p>
+                                                {% endif %}
+
+                                                {% if user.is_staff %}
+                                                    <!-- Reply input for admin only -->
+                                                    <form action="{% url 'CBapp:add_comment_reply' comment.id %}" method="post" class="reply-input">
+                                                        {% csrf_token %}
+                                                        <textarea name="content" placeholder="Reply..." rows="2" class="form-control"></textarea>
+                                                        <button type="submit" class="btn btn-secondary">Reply</button>
+                                                    </form>
                                                 {% endif %}
                                             </div>
                                         {% endfor %}
