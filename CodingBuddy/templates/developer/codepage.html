@@ -161,7 +161,6 @@
                                             <strong>{{ comment.user.username }}</strong>: {{ comment.content }}
                                             <p><em>{{ comment.created_at }}</em></p>
                                             {% if request.user == comment.user and is_developer %}
-                                                <  !-- Edit button for the comment's author -->
                                                 <button onclick="showEditForm({{ comment.id }})" class="edit-button">Edit</button>
 
                                                   <!-- Edit form (initially hidden) -->
@@ -186,6 +185,10 @@
 
                                             {% if request.user.is_staff %}
                                                  <!-- Delete button for admin only -->
+                                                <button onclick="deleteComment('{{ comment.id }}')" class="delete-button">Delete</button>
+                                            {% endif %}
+
+                                            {% if request.user == comment.user and is_developer %}
                                                 <button onclick="deleteComment('{{ comment.id }}')" class="delete-button">Delete</button>
                                             {% endif %}
 
