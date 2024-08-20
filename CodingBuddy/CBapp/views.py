@@ -3,12 +3,12 @@ import markdown
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User, Group
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_http_methods
-from .forms import CodeProblemForm, MessageForm, ProblemFilterForm, CommentForm, TutorialDeveloperForm, SolutionForm
-from .models import CodeProblem, Comment, Message, Tutorial, Solution
+from .forms import CodeProblemForm, MessageForm, ProblemFilterForm, CommentForm, TutorialDeveloperForm, SolutionForm, CommentReplyForm
+from .models import CodeProblem, Comment, Message, Tutorial, Solution, CommentReply
 
 
 def aboutus(request):
@@ -53,17 +53,28 @@ def codepage(request):
             accepted_problems = accepted_problems.filter(language__icontains=language)
 
     comment_form = CommentForm()
+    reply_form = CommentReplyForm()
 
     if request.method == 'POST':
-        comment_form = CommentForm(request.POST)
-        if comment_form.is_valid():
-            problem_id = request.POST.get('problem_id')
-            problem = CodeProblem.objects.get(id=problem_id)
-            comment = comment_form.save(commit=False)
-            comment.user = user
-            comment.problem = problem
-            comment.save()
-            return redirect('CBapp:codepage')
+            comment_form = CommentForm(request.POST)
+            if comment_form.is_valid():
+                problem_id = request.POST.get('problem_id')
+                problem = CodeProblem.objects.get(id=problem_id)
+                comment = comment_form.save(commit=False)
+                comment.user = user
+                comment.problem = problem
+                comment.save()
+                return redirect('CBapp:codepage')
+
+            reply_form = CommentReplyForm(request.POST)
+            if reply_form.is_valid():
+                comment_id = request.POST.get('comment_id')
+                comment = Comment.objects.get(id=comment_id)
+                reply = reply_form.save(commit=False)
+                reply.user = user
+                reply.comment = comment
+                reply.save()
+                return redirect('CBapp:codepage')
 
     problem_comments = {problem.id: problem.comments.all() for problem in code_problems}
 
@@ -84,6 +95,7 @@ def codepage(request):
         'is_staff': is_staff,
         'problem_comments': problem_comments,
         'comment_form': comment_form,
+        'reply_form': reply_form,
     }
     return render(request, 'developer/codepage.html', context)
 
@@ -269,6 +281,39 @@ def add_comment(request, problem_id):
 
 @login_required
 @require_http_methods(["POST"])
+def add_comment_reply(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+
+    if not request.user.is_staff:
+        return redirect('some_access_denied_page')  # Redirect or show an error page
+
+    if request.method == 'POST':
+        form = CommentReplyForm(request.POST)
+        if form.is_valid():
+            reply = form.save(commit=False)
+            reply.user = request.user
+            reply.comment = comment
+            reply.save()
+            return redirect('CBapp:codepage')  # Redirect back to the codepage or relevant page
+
+    return redirect('CBapp:codepage')
+
+
+def delete_reply(request, reply_id):
+    reply = get_object_or_404(CommentReply, id=reply_id)
+
+    # Check if the user is an admin and the owner of the reply
+    if request.user.is_staff and request.user == reply.user:
+        if request.method == 'POST':
+            reply.delete()
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+        else:
+            return HttpResponseForbidden("You do not have permission to delete this reply.")
+    else:
+        return HttpResponseForbidden("You do not have permission to delete this reply.")
+
+@login_required
+@require_http_methods(["POST"])
 def send_message(request):
     form = MessageForm(request.POST)
     if form.is_valid():
@@ -296,16 +341,16 @@ def analyze_code(code, issue, language):
         openai.api_key = settings.OPENAI_API_KEY
         content = f"""
                 Please check if the following code addresses the issue described below:
-                
+
                 Issue:
                 {issue}
-                
+
                 Language:
                 {language}
-                
+
                 Code:
                 {code}
-                
+
                 Additionally, analyze the code and provide detailed feedback on its correctness, efficiency, and potential improvements.
                 """
         response = openai.ChatCompletion.create(
