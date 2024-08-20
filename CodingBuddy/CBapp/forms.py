@@ -1,11 +1,12 @@
 from django import forms
-from .models import CodeProblem, Comment, Solution, Tutorial, CommentReply
+from .models import CodeProblem, Comment, Solution, Tutorial, CommentReply,Message
+from django.contrib.auth.models import User
 
 
 class CodeProblemForm(forms.ModelForm):
     class Meta:
         model = CodeProblem
-        fields = ['problem', 'description','solution','language']
+        fields = ['problem','short_description', 'description','solution','language']
 
 class ProblemFilterForm(forms.Form):
     language = forms.CharField(max_length=50, required=False)
@@ -20,9 +21,6 @@ class AdminCodeProblemForm(forms.ModelForm):
         model = CodeProblem
         fields = ['status']
 
-from django import forms
-from django.contrib.auth.models import User
-from .models import Message
 
 class MessageForm(forms.ModelForm):
     receiver = forms.ModelChoiceField(

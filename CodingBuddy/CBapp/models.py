@@ -5,6 +5,7 @@ from django.db import models
 class CodeProblem(models.Model):
     problem = models.CharField(max_length=255)
     description = models.TextField()
+    short_description = models.CharField(max_length=255, blank=True, null=True)
     solution = models.TextField()
     status = models.CharField(max_length=50, choices=[('pending', 'Pending'), ('accepted', 'Accepted')])
     language = models.CharField(max_length=50)

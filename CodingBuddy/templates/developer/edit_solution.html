@@ -46,6 +46,10 @@
                             {{ form.problem }}
                         </div>
 
+                        <div class="form-group">
+                            <label for="editor-short-description" class="form-label">Short Description</label>
+                            <textarea name="short_description" id="editor-short-description">{{ form.short_description.value }}</textarea>
+                        </div>
                         <!-- Description Field (Markdown Editor) -->
                         <div class="form-group">
                             <label for="editor-description" class="form-label">Description</label>
@@ -80,6 +84,7 @@
 <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
 <script>
     // Initialize SimpleMDE editors
+    var simplemdeShort_Description = new SimpleMDE({ element: document.getElementById("editor-short-description") });
     var simplemdeDescription = new SimpleMDE({ element: document.getElementById("editor-description") });
     var simplemdeSolution = new SimpleMDE({ element: document.getElementById("editor-solution") });
 </script>

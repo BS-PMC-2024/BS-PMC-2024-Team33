@@ -270,9 +270,6 @@ def add_comment(request, problem_id):
 def add_comment_reply(request, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
 
-    if not request.user.is_staff:
-        return redirect('some_access_denied_page')  # Redirect or show an error page
-
     if request.method == 'POST':
         form = CommentReplyForm(request.POST)
         if form.is_valid():
@@ -338,7 +335,7 @@ def analyze_code(code, issue, language):
                 Code:
                 {code}
 
-                Additionally, analyze the code and provide detailed feedback on its correctness, efficiency, and potential improvements.
+                Additionally, analyze the code and provide detailed feedback on its correctness, efficiency, and potential improvements only if it's related to the issue, otherwise provide solution to the issue.
                 """
         response = openai.ChatCompletion.create(model="gpt-3.5-turbo",
             messages=[{"role": "system", "content": "You are an expert code analyzer."},
