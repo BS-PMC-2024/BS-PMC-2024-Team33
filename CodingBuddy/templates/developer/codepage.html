@@ -8,7 +8,7 @@
         .container {
             text-align: center;
         }
-        .code-problem, .card {
+        .toggle-card, .code-problem, .card {
             margin-bottom: 20px;
             padding: 20px;
             background-color: #f9f9f9;
@@ -19,6 +19,10 @@
             position: relative;
             overflow: hidden;
             max-width: 100%;
+        }
+        .toggle-card {
+        box-sizing: border-box;
+        min-height: 208px;
         }
         .code-block {
             background-color: #f5f5f5;
@@ -127,21 +131,60 @@
             border-radius: 4px;
             border: 1px solid #ddd;
         }
+        .toggle-card-body{
+        display: none;
+        }
+
+        /* Style for the h2 element */
+h2 {
+    font-size: 2em; /* Adjust the size as needed */
+    font-weight: bold; /* Makes the text bold */
+    color: #333; /* Dark gray color for the text */
+    margin: 0 0 1em 0; /* Adds margin at the bottom */
+    padding: 0; /* Removes default padding */
+    text-align: center; /* Center the title */
+}
+
+/* Remove underline and default link styling for the a tag within h2 */
+h2 a {
+    text-decoration: none; /* Removes underline */
+    color: inherit; /* Inherits color from the h2 element */
+    font-weight: inherit; /* Inherits font weight from the h2 element */
+}
+
+/* Additional fancy style for the h2 */
+h2 {
+    border-bottom: 2px solid #ddd; /* Adds a subtle border at the bottom */
+    padding-bottom: 0.5em; /* Adds space between text and border */
+    letter-spacing: 1px; /* Adds spacing between letters */
+}
+        h2 a:hover{
+            color: blue;
+        }
+
     </style>
 {% endblock %}
 
 {% block content %}
     <div class="container">
         {% if is_developer or is_staff %}
-            <h1>DEVELOPER ACCESS</h1>
+                {% if is_developer %}
+                     <h1>DEVELOPER ACCESS</h1>
+                {% endif %}
+                {% if is_staff %}
+                     <h1>ADMIN ACCESS</h1>
+                {% endif %}
+
+
             <a class="btn btn-primary btn-lg mb-4" href="{% url 'CBapp:add_code_problem' %}" role="button">Add Code Problem</a>
 
             {% if code_problems %}
                 <div class="row">
                     {% for problem in code_problems %}
-                        <div class="col-md-4">
-                            <div class="code-problem">
-                                <h2><a href="{% url 'CBapp:problem_detail' problem.id %}">{{ problem.problem }}</a></h2>
+                       <div class="col-md-4">
+                        <div class="toggle-card">
+                         <h2><a href="{% url 'CBapp:problem_detail' problem.id %}">{{ problem.problem }}</a></h2>
+                            <div class="code-problem toggle-card-body">
                                 <div class="code-block" id="description-{{ problem.id }}">
                                     {{ problem.description|safe }}
                                 </div>
@@ -234,6 +277,8 @@
                                     <button type="submit" class="btn btn-secondary">Add Comment</button>
                                 </form>
                             </div>
+                            <button onclick="toggleCard(event)" class="btn btn-primary">Show more</button>
+                        </div>
                         </div>
                     {% endfor %}
                 </div>
@@ -255,9 +300,10 @@
                 {% if accepted_problems %}
                     {% for problem in accepted_problems %}
                         <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h2><a href="{% url 'CBapp:problem_detail' problem.id %}">{{ problem.problem }}</a></h2>
+                            <div class="card toggle-card">
+                               <h2><a href="{% url 'CBapp:problem_detail' problem.id %}">{{ problem.problem }}</a></h2>
+
+                                <div class="card-body toggle-card-body">
                                     <div class="code-block" id="description-{{ problem.id }}">
                                         {{ problem.description|safe }}
                                     </div>
@@ -327,6 +373,7 @@
                                         <button type="submit" class="btn btn-secondary">Add Comment</button>
                                     </form>
                                 </div>
+                                    <button onclick="toggleCard(event)" class="btn btn-primary">Show more</button>
                             </div>
                         </div>
                     {% endfor %}
@@ -402,5 +449,25 @@
             var form = document.getElementById('edit-form-' + commentId);
             form.style.display = form.style.display === 'none' ? 'block' : 'none';
         }
+
+        function toggleCard(e) {
+    const clickedElement = e.target;
+
+    const card = clickedElement.closest('.toggle-card');
+
+    const cardBody = card.querySelector('.toggle-card-body');
+
+    if (cardBody.style.display === 'none' || cardBody.style.display === '') {
+        cardBody.style.display = 'block';
+        clickedElement.textContent = 'Show less';
+
+    } else {
+        cardBody.style.display = 'none';
+        clickedElement.textContent = 'Show more';
+
+    }
+}
+
+
     </script>
 {% endblock %}
