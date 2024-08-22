@@ -1,57 +1,148 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Home | CodingBuddy{% endblock %}
+{% block title %}About Us | CodingBuddy{% endblock %}
 
 {% block extra_styles %}
   {{ block.super }}
-    <style>
-        body {
-                font-family: Arial, sans-serif;
-                background-color: #007bff; /* Blue background color */
-                margin: 0;
-                padding: 0;
-                color: #ffffff; /* White text color */
-            }
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5; /* Light grey background */
+      margin: 0;
+      padding: 0;
+      color: #333; /* Dark grey text color */
+    }
 
-            .about-container {
-                max-width: 800px;
-                margin: 50px auto;
-                padding: 20px;
-                background-color: #ffffff; /* White background for content */
-                color: #333333; /* Dark text color for readability */
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-                border-radius: 8px;
-            }
+    .team-container {
+      max-width: 1200px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
 
-            h1 {
-                text-align: center;
-                color: #007bff; /* Blue color for the heading */
-                margin-bottom: 20px;
-            }
+    h1 {
+      text-align: center;
+      color: #333; /* Dark grey color for the heading */
+      margin-bottom: 20px;
+    }
 
-            p {
-                line-height: 1.6;
-                font-size: 18px;
-                margin-bottom: 20px;
-            }
+    .team-section {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      margin-top: 20px;
+      margin-bottom: 40px;
+    }
 
-            p strong {
-                color: #007bff; /* Blue color for bold text */
-            }
+    .team-member {
+      text-align: center;
+      padding: 20px;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    }
 
-            p em {
-                font-style: italic;
-                color: #555555;
-            }
-    </style>
+    .team-member img {
+      border-radius: 50%;
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      margin-bottom: 15px;
+    }
+
+    .team-member h3 {
+      margin: 10px 0 5px;
+      color: #333;
+    }
+
+    .team-member p {
+      margin: 5px 0;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .social-links {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .social-links a {
+      margin: 0 5px;
+      color: #555;
+      text-decoration: none;
+      font-size: 18px;
+    }
+
+    .about-section {
+      margin-top: 50px;
+      padding: 20px;
+      background-color: #fff;
+      color: #333;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .about-section p {
+      line-height: 1.6;
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+
+    .about-section p strong {
+      color: #333;
+    }
+
+    .about-section p em {
+      font-style: italic;
+      color: #555;
+    }
+  </style>
 {% endblock %}
 
 {% block content %}
- <div class="about-container">
-        <h1>About Us</h1>
-        <p><strong>BS-PMC-2024-Team33 / CodingBuddy</strong> is a dedicated team focused on enhancing the learning experience for students and coding enthusiasts. Our project, <em>CodingBuddy</em>, is designed to provide an interactive platform where users can sharpen their coding skills, explore multiple solutions to coding problems, and receive AI-powered feedback to guide their learning journey.</p>
-        <p>Our vision is to make coding practice more personalized and insightful by offering a diverse set of coding challenges, tutorials, and a unique AI system that evaluates and provides feedback on user submissions. We believe that everyone, from beginners to advanced coders, deserves access to tools that help them improve and grow in their coding careers.</p>
-        <p>Our team is passionate about education and technology, and we are committed to delivering a platform that is not only functional but also user-friendly and accessible to all. We aim to create an environment where users can learn at their own pace, explore new concepts, and achieve their coding goals with the support of our innovative features.</p>
-        <p>Join us on this journey to make coding practice more engaging, effective, and enjoyable!</p>
+  <div class="team-container">
+    <h1>Our Team Page</h1>
+    <div class="team-section">
+      <div class="team-member">
+        <img src="{% static 'home/images/seraj.jpeg' %}" alt="Seraj">
+        <h3>Seraj</h3>
+        <p>Developer/Designer</p>
+        <p>eg.seraj@gmail.com</p>
+      </div>
+      <div class="team-member">
+        <img src="{% static 'home/images/shade.png' %}" alt="Shadi">
+        <h3>Shadi</h3>
+        <p>Developer/Designer</p>
+        <p>Shadi@gmail.com</p>
+        <div class="social-links">
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-facebook-f"></i></a>
+          <a href="#"><i class="fab fa-linkedin-in"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-youtube"></i></a>
+        </div>
+      </div>
+      <div class="team-member">
+        <img src="{% static 'home/images/Yo.jpg' %}" alt="Younes">
+        <h3>Younes</h3>
+        <p>Developer</p>
+        <p>Younes@gmail.com</p>
+      </div>
+      <div class="team-member">
+        <img src="{% static 'home/images/moh.jpg' %}" alt="Mohammad">
+        <h3>Mohammad</h3>
+        <p>Developer</p>
+        <p>Mohammad@gmail.com</p>
+      </div>
     </div>
+    <div class="about-section">
+      <p><strong>BS-PMC-2024-Team33 / CodingBuddy</strong> is a dedicated team focused on enhancing the learning experience for students and coding enthusiasts. Our project, <em>CodingBuddy</em>, is designed to provide an interactive platform where users can sharpen their coding skills, explore multiple solutions to coding problems, and receive AI-powered feedback to guide their learning journey.</p>
+      <p>Our vision is to make coding practice more personalized and insightful by offering a diverse set of coding challenges, tutorials, and a unique AI system that evaluates and provides feedback on user submissions. We believe that everyone, from beginners to advanced coders, deserves access to tools that help them improve and grow in their coding careers.</p>
+      <p>Our team is passionate about education and technology, and we are committed to delivering a platform that is not only functional but also user-friendly and accessible to all. We aim to create an environment where users can learn at their own pace, explore new concepts, and achieve their coding goals with the support of our innovative features.</p>
+      <p>Join us on this journey to make coding practice more engaging, effective, and enjoyable!</p>
+    </div>
+  </div>
 {% endblock %}
