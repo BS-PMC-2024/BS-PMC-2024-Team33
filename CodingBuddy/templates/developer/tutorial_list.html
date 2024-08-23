@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}
     Tutorial List
@@ -198,7 +199,9 @@
             </ul>
             <a class="add-tutorial" href="/developer/tutorials/add/">Add Tutorial</a>
         {% else %}
-            <h1>Tutorials</h1>
+            <div style="text-align: center;">
+                <img src="{% static 'home/images/tu.png' %}" alt="tu">
+            </div>
             <div class="filter-container">
                 <form method="get">
                     <select name="language" id="language">

@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}Let's Chat!{% endblock %}
 {% block extra_styles %}
     {{ block.super }}
@@ -124,8 +126,9 @@
 {% endblock %}
 {% block content %}
     <div class="container mt-5 fade-in">
-        <h1 class="text-center mb-4" style="color: #3c4858;">Let's Chat!</h1>
-
+            <div style="text-align: center;">
+                <img src="{% static 'home/images/chat.png' %}" alt="tu">
+            </div>
         <button type="button" class="collapsible fade-in">Send a Message</button>
         <div class="content">
             <form method="post">
