@@ -14,15 +14,29 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInContainer 1s ease-out forwards;
         }
+        @keyframes fadeInContainer {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .custom-container h1 {
             text-align: center;
             color: #333;
+            font-size: 2.5em;
+            margin-bottom: 30px;
         }
+
         .custom-container ul {
             list-style-type: none;
             padding: 0;
         }
+
         .custom-container li {
             padding: 20px;
             border: 1px solid #ddd;
@@ -31,58 +45,127 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInListItems 0.8s ease-out forwards;
+            animation-delay: 0.5s;
         }
+        @keyframes fadeInListItems {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .custom-container .language {
-            font-size: 1.5em;
+            font-size: 1.8em;
             color: #555;
             margin-bottom: 10px;
             text-align: center;
             width: 100%;
         }
+
         .custom-container .tutorial-links {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px;
+            gap: 20px;
             width: 100%;
         }
+
         .custom-container .tutorial-links a {
             color: #007bff;
             text-decoration: none;
-            padding: 5px 10px;
-            border-right: 1px solid #ddd;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: all 0.3s ease;
         }
-        .custom-container .tutorial-links a:last-child {
-            border-right: none;
-        }
+
         .custom-container .tutorial-links a:hover {
-            text-decoration: underline;
+            background-color: #e9ecef;
+            color: #0056b3;
+            text-decoration: none;
         }
+
         .custom-container .edit-link {
-            margin-top: 10px;
-            padding: 5px 10px;
+            margin-top: 15px;
+            padding: 8px 15px;
             background-color: #ffc107;
             color: #fff;
             border-radius: 5px;
             text-decoration: none;
             transition: background-color 0.3s;
         }
+
         .custom-container .edit-link:hover {
             background-color: #e0a800;
         }
+
         .custom-container .add-tutorial {
             display: block;
             text-align: center;
-            margin: 20px 0;
-            padding: 10px 20px;
+            margin: 25px 0;
+            padding: 12px 25px;
             background-color: #28a745;
             color: #fff;
             border-radius: 5px;
             text-decoration: none;
             transition: background-color 0.3s;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInAddButton 1s ease-out forwards;
+            animation-delay: 1s;
         }
+        @keyframes fadeInAddButton {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .custom-container .add-tutorial:hover {
             background-color: #218838;
+        }
+
+        /* Fancy filter dropdown */
+        .filter-container {
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .filter-container select {
+            font-family: 'Roboto', sans-serif;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 2px solid #007bff;
+            background-color: #fff;
+            color: #007bff;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+
+        .filter-container select:hover, .filter-container select:focus {
+            background-color: #007bff;
+            color: #fff;
+            outline: none;
+        }
+
+        .filter-container button {
+            padding: 10px 20px;
+            margin-left: 10px;
+            border-radius: 8px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .filter-container button:hover {
+            background-color: #0056b3;
         }
     </style>
 {% endblock %}
@@ -98,13 +181,13 @@
                         <div class="language"><strong>{{ tutorial.language }}</strong></div>
                         <div class="tutorial-links">
                             {% if tutorial.youtube_link %}
-                                <a href="{{ tutorial.youtube_link }}" target="_blank"><strong>YouTube Link:</strong> Watch on YouTube</a>
+                                <a href="{{ tutorial.youtube_link }}" target="_blank">🎥 YouTube: Watch Now</a>
                             {% endif %}
                             {% if tutorial.medium_link %}
-                                <a href="{{ tutorial.medium_link }}" target="_blank"><strong>Medium Link:</strong> Read on Medium</a>
+                                <a href="{{ tutorial.medium_link }}" target="_blank">✍️ Medium: Read Article</a>
                             {% endif %}
                             {% if tutorial.wikipedia_link %}
-                                <a href="{{ tutorial.wikipedia_link }}" target="_blank"><strong>Wikipedia Link:</strong> Read on Wikipedia</a>
+                                <a href="{{ tutorial.wikipedia_link }}" target="_blank">📚 Wikipedia: Learn More</a>
                             {% endif %}
                         </div>
                         <a class="edit-link" href="/developer/tutorials/edit/{{ tutorial.id }}/">Edit</a>
@@ -115,67 +198,44 @@
             </ul>
             <a class="add-tutorial" href="/developer/tutorials/add/">Add Tutorial</a>
         {% elif is_student %}
-        <!-- student/tutorial_list.html -->
-        <div class="container">
-    <h1>Tutorials</h1>
-
-    <!-- Language Filter Form -->
-    <form method="get" class="mb-4">
-        <label for="language">Filter by Language:</label>
-        <select name="language" id="language">
-            <option value="">All Languages</option>
-            {% for language in languages %}
-                <option value="{{ language }}" {% if language == selected_language %}selected{% endif %}>
-                    {{ language }}
-                </option>
-            {% endfor %}
-        </select>
-        <!-- Add the Filter Button -->
-        <button type="submit" class="btn btn-primary mt-2">Filter</button>
-    </form>
-
-    <!-- Tutorials List -->
-    <div class="row">
-        {% for tutorial in tutorials %}
-            <div class="col-md-4">
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h3 class="card-title">{{ tutorial.get_language_display }}</h3>
-                        <p><strong>YouTube:</strong> <a href="{{ tutorial.youtube_link }}" target="_blank">{{ tutorial.youtube_link }}</a></p>
-                        <p><strong>Medium:</strong> <a href="{{ tutorial.medium_link }}" target="_blank">{{ tutorial.medium_link }}</a></p>
-                        <p><strong>Wikipedia:</strong> <a href="{{ tutorial.wikipedia_link }}" target="_blank">{{ tutorial.wikipedia_link }}</a></p>
-                    </div>
-                </div>
+            <h1>Tutorials</h1>
+            <div class="filter-container">
+                <form method="get">
+                    <select name="language" id="language">
+                        <option value="">All Languages</option>
+                        {% for language in languages %}
+                            <option value="{{ language }}" {% if language == selected_language %}selected{% endif %}>
+                                {{ language }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit">Filter</button>
+                </form>
             </div>
-        {% endfor %}
-    </div>
-    <button onclick="location.href='/'" class="back-button">Back</button>
-</div>
-    </div>
-<!--            <div class="container">-->
-<!--                <h1>Tutorials</h1>-->
-<!--                <div class="row">-->
-<!--                    {% for tutorial in tutorials %}-->
-<!--                    <div class="col-md-4">-->
-<!--                        <div class="card mb-4">-->
-<!--                            <div class="card-body">-->
-<!--                                <h3 class="card-title">{{ tutorial.get_language_display }}</h3>-->
-<!--                                <p><strong>YouTube:</strong> <a href="{{ tutorial.youtube_link }}" target="_blank">Watch on YouTube</a></p>-->
-<!--                                <p><strong>Medium:</strong> <a href="{{ tutorial.medium_link }}" target="_blank">Read on Medium</a></p>-->
-<!--                                <p><strong>Wikipedia:</strong> <a href="{{ tutorial.wikipedia_link }}" target="_blank">Read on Wikipedia</a></p>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    {% endfor %}-->
-<!--                </div>-->
-<!--                <button class="back-button" onclick="location.href='/'">Back</button>-->
-<!--            </div>-->
+            <ul>
+                {% for tutorial in tutorials %}
+                    <li>
+                        <div class="language"><strong>{{ tutorial.language }}</strong></div>
+                        <div class="tutorial-links">
+                            {% if tutorial.youtube_link %}
+                                <a href="{{ tutorial.youtube_link }}" target="_blank">🎥 YouTube: Watch Now</a>
+                            {% endif %}
+                            {% if tutorial.medium_link %}
+                                <a href="{{ tutorial.medium_link }}" target="_blank">✍️ Medium: Read Article</a>
+                            {% endif %}
+                            {% if tutorial.wikipedia_link %}
+                                <a href="{{ tutorial.wikipedia_link }}" target="_blank">📚 Wikipedia: Learn More</a>
+                            {% endif %}
+                        </div>
+                    </li>
+                {% empty %}
+                    <li>No tutorials found.</li>
+                {% endfor %}
+            </ul>
+            <button onclick="location.href='/'" class="back-button">Back</button>
         {% else %}
             <h1>Unauthorized Access</h1>
             <p>You are not authorized to access this page.</p>
-
         {% endif %}
     </div>
 {% endblock %}
-
-
