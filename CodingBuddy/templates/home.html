@@ -5,101 +5,70 @@
 {% block content %}
 <style>
   .hero-section {
-    position: relative;
     text-align: center;
-    color: white;
-    margin-bottom: 20px;
+    margin-bottom: 40px;
   }
 
-  .hero-title {
-    font-size: 3.5rem;
-    font-weight: bold;
-    margin: 0;
-    padding: 20px 0;
-    background: rgba(0, 0, 0, 0.7);
-    border-radius: 15px 15px 0 0;
+  .welcome-section img {
+    width: 220px;
+    height: auto;
+    margin: 0 20px;
   }
 
-  .hero-image {
-    background-image: url('https://www.codemotion.com/magazine/wp-content/uploads/2023/07/Collaborative-Coding.-A-developer-team-working-together.-min-896x504.jpg');
-    background-size: cover;
-    background-position: center;
-    height: 60vh;
+  .welcome-section span {
+    font-size: 58px;
+    font-weight: 900;
+    color: #343a40;
+  }
+
+  .content-section {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    border-radius: 0 0 15px 15px;
-    position: relative;
-    overflow: hidden;
+    max-width: 1200px;
+    margin: 0 auto 40px auto;
   }
 
-  .hero-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* darken the image */
-  }
-
-  .hero-content {
-    position: relative;
-    z-index: 1;
-    color: white;
-    text-align: center;
-  }
-
-  .hero-content p {
-    font-size: 1.2rem;
-    margin: 20px 0 0 0;
-  }
-
-  .jumbotron {
-    background-color: #f8f9fa;
-    border-radius: 15px;
-    padding: 2rem;
-    text-align: center;
-    margin-top: 20px;
-  }
-
-  .jumbotron p.lead {
-    font-size: 1.4rem; /* Slightly increase the font size */
-    font-weight: 600; /* Make the font bolder */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
-
-  .jumbotron p {
-    font-size: 1.2rem; /* Adjust the font size to be consistent */
-    font-weight: 500; /* Make the font slightly bolder */
-  }
-
-  .btn-cta {
-    margin-top: 20px;
-    padding: 10px 20px;
-    font-size: 1.2rem;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 50px;
-    text-transform: uppercase;
-    transition: background-color 0.3s ease;
-    display: inline-block;
-  }
-
-  .btn-cta:hover {
-    background-color: #0056b3;
-  }
-
-  .btn-container {
+  .info-cards {
     display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 20px;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 40px;
   }
 
-  .video-section {
-    margin-top: 40px;
-    text-align: center;
+    .info-cards a {
+        text-decoration: none;
+        color: inherit; /* Keeps the text color the same as it was without a link */
+        flex: 1;
+        background-color: #ffffff;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: block; /* Makes the entire card clickable */
+    }
+
+    .info-cards a:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Slightly deeper shadow on hover */
+    }
+
+    .info-cards a h3, .info-cards a p {
+        margin: 0;
+    }
+
+
+  .info-card p {
+    font-size: 1rem;
+    color: #666666;
+    line-height: 1.6;
+  }
+
+    .video-section {
+    max-width: 800px; /* Increase the max-width for a larger video */
+    margin-top: 20px;
   }
 
   .video-container {
@@ -121,38 +90,47 @@
     height: 100%;
   }
 </style>
-<div style="text-align: center; margin-bottom: 20px; display: flex; align-items: center; justify-content: center;">
-    <img src="{% static 'home/images/CodingBuddylogo.png' %}" alt="CodingBuddy" style="width: 250px; height: auto; margin-right: 20px;">
-    <span style="font-size: 64px; font-weight: 900; ;">Welcome To CodingBuddy!</span>
-    <img src="{% static 'home/images/CodingBuddylogo.png' %}" alt="CodingBuddy" style="width: 250px; height: auto; margin-left: 20px;">
-</div>
-<div style="text-align: center; font-size: 18px; line-height: 1.5; max-width: 800px; margin: 0 auto;">
-    <p>At CodingBuddy, we're passionate about helping you enhance your coding skills. Our platform offers a wide range of coding questions designed to challenge and improve your problem-solving abilities. Submit your solutions and receive instant AI-powered feedback to help you learn and grow.</p>
-    <p>But that's not all—CodingBuddy also features a robust messaging system that allows you to connect with other users, share insights, and collaborate on projects. Whether you're stuck on a problem or just want to discuss coding concepts, our community is here to support you.</p>
-    <p>Additionally, explore our extensive library of tutorials, crafted to guide you through various programming topics, from beginner to advanced levels. Whether you're honing your skills or learning something new, CodingBuddy is your go-to resource for coding success.</p>
-    <p>Join us today and start your journey to becoming a better coder with CodingBuddy!</p>
-    <br>
-    <br>
-    <p>Here's a video to guide you through our website:</p>
+
+<!-- Hero Section with Welcome Message -->
+<div style="text-align: center; margin-bottom: 20px;">
+    <!-- Centered Welcome Section -->
+    <img src="{% static 'home/images/WelcometoCodingBuddy.png' %}" alt="CodingBuddy" style="width: 700px; height: auto; margin-right: 20px;">
+
 </div>
 
-<div class="hero-section">
+<!-- Main Content Section with Cards and Video -->
+<div class="content-section">
+    <!-- Information Cards -->
+    <div class="info-cards">
+        <a href="/codepage" class="info-card">
+            <h3>Coding Challenges</h3>
+            <p>Enhance your coding skills by solving a wide range of coding problems designed to challenge and improve your problem-solving abilities.</p>
+        </a>
+        <a href="/codepage" class="info-card">
+            <h3>AI-Powered Feedback</h3>
+            <p>Receive instant AI-generated feedback on your solutions to help you learn and grow as a developer.</p>
+        </a>
+        <a href="/chat" class="info-card">
+            <h3>Community Interaction</h3>
+            <p>Connect with other users, share insights, and collaborate on projects through our robust messaging system.</p>
+        </a>
+        <a href="/tutorials" class="info-card">
+            <h3>Interactive Tutorials</h3>
+            <p>Explore our extensive library of tutorials to guide you through various programming topics, from beginner to advanced levels.</p>
+        </a>
+    </div>
 
-  <div class="video-section">
-  <div class="video-container">
-    <video controls autoplay>
-      <source src="{% static 'videos/BS-PMC-2024-Team33 – signup.html 2024-07-17 21-14-24.mp4' %}" type="video/mp4">
-      Your browser does not support the video tag.
-    </video>
-  </div>
-</div>
-</div>
 
-<div class="jumbotron">
-    <p class="lead">This is a simple, modern platform to practice coding, view multiple solutions, and receive AI-generated feedback.</p>
-    <hr class="my-4">
-    <p>Get started by solving problems and learning through interactive tutorials.</p>
-    <a class="btn-cta" href="/codepage">View our coding problems!</a>
+    <div class="video-section">
+        <h3 style="text-align: center; color: #343a40; margin-bottom: 20px;">Explore CodingBuddy</h3>
+        <div class="video-container">
+            <video controls autoplay>
+                <source src="{% static 'videos/BS-PMC-2024-Team33 – signup.html 2024-07-17 21-14-24.mp4' %}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </div>
+</div>
 
 
 {% endblock %}
