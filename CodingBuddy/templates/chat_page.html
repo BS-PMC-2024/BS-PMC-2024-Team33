@@ -1,66 +1,150 @@
 {% extends 'base.html' %}
-{% block title %}Chat Page{% endblock %}
+{% block title %}Let's Chat!{% endblock %}
 {% block extra_styles %}
     {{ block.super }}
     <style>
         .collapsible {
-            background-color: #4CAF50;
+            background: linear-gradient(45deg, #6a85b6, #bac8e0);
             color: white;
             cursor: pointer;
-            padding: 10px;
+            padding: 15px;
             width: 100%;
             border: none;
             text-align: left;
             outline: none;
-            font-size: 15px;
-            border-radius: 5px;
+            font-size: 18px;
+            border-radius: 8px;
             margin-top: 20px;
+            transition: background 0.3s ease, transform 0.3s ease;
+            position: relative;
+        }
+        .collapsible::after {
+            content: '';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            border-right: 2px solid white;
+            border-bottom: 2px solid white;
+            transform: rotate(45deg);
+            transition: transform 0.3s ease;
+        }
+        .collapsible.open::after {
+            transform: rotate(-135deg);
         }
         .collapsible:hover {
-            background-color: #45a049;
+            background: linear-gradient(45deg, #556085, #a0b3cc);
+            transform: scale(1.05);
         }
-
-
+        .content {
+            max-height: 0;
+            padding: 0 10px;
+            overflow: hidden;
+            background-color: #f4f7fa;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 10px;
+            transition: max-height 0.5s ease, padding 0.5s ease;
+        }
+        .content.show {
+            max-height: 500px; /* Adjust this value if needed */
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #3c4858;
+        }
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #3c4858;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+        .submit-button {
+            background-color: #3c4858;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .submit-button:hover {
+            background-color: #2c3e50;
+            transform: scale(1.05);
+        }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        table, th, td {
-            border: 1px solid #ccc;
+            background-color: #ffffff;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            animation: fadeIn 1s ease-in-out;
         }
         th, td {
-            padding: 10px;
+            padding: 15px;
             text-align: left;
+            border-bottom: 1px solid #ddd;
         }
         th {
-            background-color: #f4f4f4;
+            background-color: #e0e6ed;
             color: #333;
         }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
         tr:hover {
-            background-color: #f1f1f1;
+            background-color: #f1f5fa;
+            transition: background-color 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 1s ease-out forwards;
         }
     </style>
 {% endblock %}
 {% block content %}
-    <div class="container mt-5">
-        <button type="button" class="collapsible">Send a Message</button>
+    <div class="container mt-5 fade-in">
+        <h1 class="text-center mb-4" style="color: #3c4858;">Let's Chat!</h1>
+
+        <button type="button" class="collapsible fade-in">Send a Message</button>
         <div class="content">
             <form method="post">
                 {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit">Send</button>
+                <div class="form-group">
+                    <label for="{{ form.receiver.id_for_label }}">Recipient:</label>
+                    {{ form.receiver }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.content.id_for_label }}">Message:</label>
+                    {{ form.content }}
+                </div>
+                <button type="submit" class="submit-button">Send</button>
             </form>
         </div>
 
-        <button type="button" class="collapsible">Messages</button>
+        <button type="button" class="collapsible fade-in">Messages</button>
         <div class="content">
-            <table>
+            <table class="fade-in">
                 <thead>
                     <tr>
                         <th>Sender</th>
@@ -87,12 +171,21 @@
             var coll = document.getElementsByClassName('collapsible');
             for (var i = 0; i < coll.length; i++) {
                 coll[i].addEventListener('click', function() {
-                    this.classList.toggle('active');
                     var content = this.nextElementSibling;
-                    if (content.style.display === 'block') {
-                        content.style.display = 'none';
+                    if (content.classList.contains('show')) {
+                        content.classList.remove('show');
+                        this.classList.remove('open');
                     } else {
-                        content.style.display = 'block';
+                        var allContents = document.querySelectorAll('.content');
+                        allContents.forEach(function(c) {
+                            c.classList.remove('show');
+                        });
+                        var allCollapsibles = document.querySelectorAll('.collapsible');
+                        allCollapsibles.forEach(function(c) {
+                            c.classList.remove('open');
+                        });
+                        content.classList.add('show');
+                        this.classList.add('open');
                     }
                 });
             }
