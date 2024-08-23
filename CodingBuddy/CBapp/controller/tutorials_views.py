@@ -1,8 +1,10 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from ..models import Tutorial
 from ..forms import TutorialDeveloperForm
 
 
+@login_required
 def tutorial_list_developer(request):
     user = request.user
     is_developer = user.groups.filter(name='Developer').exists()
