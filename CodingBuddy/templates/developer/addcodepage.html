@@ -94,7 +94,26 @@
         <h1>Add New Code Problem</h1>
         <form method="post" action="{% url 'developer:add_code_problem' %}">
             {% csrf_token %}
-            {{ form.as_p }}
+            <div class="form-group">
+                <label for="id_problem">Problem</label>
+                {{ form.problem }}
+            </div>
+            <div class="form-group">
+                <label for="id_short_description">Short Description</label>
+                {{ form.short_description }}  <!-- New Short Description Field -->
+            </div>
+            <div class="form-group">
+                <label for="id_description">Description</label>
+                {{ form.description }}
+            </div>
+            <div class="form-group">
+                <label for="id_solution">Solution</label>
+                {{ form.solution }}
+            </div>
+            <div class="form-group">
+                <label for="id_language">Language</label>
+                {{ form.language }}
+            </div>
             <button type="submit">Add</button>
         </form>
     </div>

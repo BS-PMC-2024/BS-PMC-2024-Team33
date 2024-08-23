@@ -1,14 +1,128 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Home | Coding Problems{% endblock %}
 
 {% block extra_styles %}
     {{ block.super }}
     <style>
-        .container {
-            text-align: center;
+      @import url("https://fonts.googleapis.com/css2?family=Nunito:wght@200;500;700;800;900;1000&display=swap");
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Nunito", sans-serif;
         }
-        .toggle-card, .code-problem, .card {
+
+        body {
+            background-color: #181a1f;
+            padding: 0px 20px;
+        }
+
+        .parent {
+            height: 450px;
+            width: 300px;
+            padding: 20px;
+
+            margin: 30px;
+        }
+
+        .card {
+            padding-top: 100px;
+            transform-style: preserve-3d;
+            background-image: url("https://images.pexels.com/photos/1629236/pexels-photo-1629236.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1");
+            background-position: center center;
+            transition: all 0.5s ease-in-out;
+            border-radius: 10px;
+            height: 450px;
+            width: 300px;
+            filter: none;
+            position: relative;
+        }
+        .card:hover {
+            background-position: 80% 20%;
+            transform: rotate3d(0.5, 1, 0, 30deg);
+        }
+
+        .card2 {
+            filter: hue-rotate(150deg);
+            position: relative;
+            z-index: 1;
+        }
+
+        .card3 {
+            filter: hue-rotate(300deg);
+            position: relative;
+            z-index: 1;
+        }
+
+        .card4 {
+            filter: hue-rotate(90deg);
+            position: relative;
+            z-index: 1;
+        }
+
+        .content-box {
+            height: 100%;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.811);
+            border-radius: 0px 0px 10px 10px;
+            box-shadow: rgba(0, 115, 255, 0.925) 0px 20px 50px -25px;
+            transition: all 0.5s ease-in-out;
+            padding: 50px 25px 25px 25px;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+
+        .content-box .card-title,
+        .content-box .card-content,
+        .content-box .see-more {
+            color: white;
+            font-size: 25px;
+            font-weight: 900;
+            transition: all 0.5s ease-in-out;
+            transform: translate3d(0px, 0px, 20px);
+            position: relative;
+            z-index: 2;
+        }
+
+        .content-box .card-content {
+            padding-top: 15px;
+            font-size: 12px;
+            color: #b9b9b9;
+        }
+
+        .content-box .card-title:hover,
+        .content-box .card-content:hover,
+        .content-box .see-more:hover {
+            transform: translate3d(0px, 0px, 50px);
+        }
+
+        .date-box {
+            position: absolute;
+            top: 75px;
+            left: 25px;
+            height: 60px;
+            width: 60px;
+            background-color: black;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: #0066ff 0px 20px 60px 0px, #00c8ff 0px 18px 36px -18px;
+            z-index: 3;
+            transform: translate3d(0px, 0px, 50px);
+        }
+
+        .date-box img {
+            width: 100%;
+            height: auto;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+
+        .toggle-card, .code-problem {
             margin-bottom: 20px;
             padding: 20px;
             background-color: #f9f9f9;
@@ -20,10 +134,12 @@
             overflow: hidden;
             max-width: 100%;
         }
+
         .toggle-card {
-        box-sizing: border-box;
-        min-height: 208px;
+            box-sizing: border-box;
+            min-height: 208px;
         }
+
         .code-block {
             background-color: #f5f5f5;
             border: 1px solid #ddd;
@@ -37,13 +153,16 @@
             transition: all 0.3s ease-in-out;
             width: 100%;
         }
+
         .code-block.expanded {
             max-height: none;
             width: auto;
         }
+
         .card.expanded {
             max-width: none;
         }
+
         .show-more {
             background-color: #007bff;
             color: #fff;
@@ -57,9 +176,11 @@
             text-align: center;
             margin: 0 auto;
         }
+
         .show-more:hover {
             background-color: #0056b3;
         }
+
         .back-button, .edit-button, .delete-button {
             margin-top: 10px;
             padding: 10px 15px;
@@ -70,29 +191,36 @@
             text-decoration: none;
             display: inline-block;
         }
+
         .back-button {
             background-color: #ccc;
             color: #333;
         }
+
         .back-button:hover {
             background-color: #bbb;
         }
+
         .edit-button {
-            background-color: #007bff;
+            background-color: #008000;
             color: #fff;
             margin-left: 10px;
         }
+
         .edit-button:hover {
             background-color: #0056b3;
         }
+
         .delete-button {
             background-color: #dc3545;
             color: #fff;
             margin-left: 10px;
         }
+
         .delete-button:hover {
             background-color: #c82333;
         }
+
         .row {
             display: flex;
             flex-wrap: wrap;
@@ -100,6 +228,7 @@
             margin-right: -15px;
             margin-left: -15px;
         }
+
         .col-md-4 {
             flex: 0 0 33.33333%;
             max-width: 33.33333%;
@@ -107,6 +236,7 @@
             padding-left: 15px;
             box-sizing: border-box;
         }
+
         .comment {
             margin-bottom: 10px;
             padding: 10px;
@@ -114,6 +244,7 @@
             border-radius: 4px;
             border: 1px solid #ddd;
         }
+
         .reply {
             margin-bottom: 5px;
             padding: 8px;
@@ -121,9 +252,11 @@
             border-radius: 4px;
             border: 1px solid #ddd;
         }
+
         .comment-actions {
             margin-top: 10px;
         }
+
         .reply-input {
             margin-top: 10px;
             padding: 10px;
@@ -131,179 +264,56 @@
             border-radius: 4px;
             border: 1px solid #ddd;
         }
-        .toggle-card-body{
-        display: none;
+
+        .toggle-card-body {
+            display: none;
         }
 
-        /* Style for the h2 element */
-h2 {
-    font-size: 2em; /* Adjust the size as needed */
-    font-weight: bold; /* Makes the text bold */
-    color: #333; /* Dark gray color for the text */
-    margin: 0 0 1em 0; /* Adds margin at the bottom */
-    padding: 0; /* Removes default padding */
-    text-align: center; /* Center the title */
-}
+        h2 {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+            margin: 0 0 1em 0;
+            padding: 0;
+            text-align: center;
+        }
 
-/* Remove underline and default link styling for the a tag within h2 */
-h2 a {
-    text-decoration: none; /* Removes underline */
-    color: inherit; /* Inherits color from the h2 element */
-    font-weight: inherit; /* Inherits font weight from the h2 element */
-}
+        h2 a {
+            text-decoration: none;
+            color: inherit;
+            font-weight: inherit;
+        }
 
-/* Additional fancy style for the h2 */
-h2 {
-    border-bottom: 2px solid #ddd; /* Adds a subtle border at the bottom */
-    padding-bottom: 0.5em; /* Adds space between text and border */
-    letter-spacing: 1px; /* Adds spacing between letters */
-}
-        h2 a:hover{
+        h2 {
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 0.5em;
+            letter-spacing: 1px;
+        }
+
+        h2 a:hover {
             color: blue;
         }
-
     </style>
 {% endblock %}
 
 {% block content %}
     <div class="container">
         {% if is_developer or is_staff %}
-                {% if is_developer %}
-                     <h1>DEVELOPER ACCESS</h1>
-                {% endif %}
-                {% if is_staff %}
-                     <h1>ADMIN ACCESS</h1>
-                {% endif %}
-
-
+            {% if is_developer %}
+                <h1>DEVELOPER ACCESS</h1>
+            {% endif %}
+            {% if is_staff %}
+                <h1>ADMIN ACCESS</h1>
+            {% endif %}
             <a class="btn btn-primary btn-lg mb-4" href="{% url 'CBapp:add_code_problem' %}" role="button">Add Code Problem</a>
 
             {% if code_problems %}
                 <div class="row">
                     {% for problem in code_problems %}
-                       <div class="col-md-4">
-                        <div class="toggle-card">
-                         <h2><a href="{% url 'CBapp:problem_detail' problem.id %}">{{ problem.problem }}</a></h2>
-                            <div class="code-problem toggle-card-body">
-                                <div class="code-block" id="description-{{ problem.id }}">
-                                    {{ problem.description|safe }}
-                                </div>
-                                <button class="show-more" onclick="toggleShowMore('description-{{ problem.id }}', this)">Show more</button>
-                                <div class="code-block" id="solution-{{ problem.id }}">
-                                    {{ problem.solution|safe }}
-                                </div>
-                                <button class="show-more" onclick="toggleShowMore('solution-{{ problem.id }}', this)">Show more</button>
-                                <button onclick="window.location.href='{% url 'CBapp:edit_solution' problem.id %}'" class="edit-button">Edit Solution</button>
-                                <button onclick="deleteProblem('{{ problem.id }}')" class="delete-button">Delete</button>
-
-                                <!-- Display comments -->
-                                <div class="comments">
-                                    <h3>Comments</h3>
-                                    {% for comment in problem.comments.all %}
-                                        <div class="comment">
-                                            <strong>{{ comment.user.username }}</strong>: {{ comment.content }}
-                                            <p><em>{{ comment.created_at }}</em></p>
-                                            {% if request.user == comment.user and is_developer %}
-                                                <button onclick="showEditForm({{ comment.id }})" class="edit-button">Edit</button>
-
-                                                <!-- Edit form (initially hidden) -->
-                                                <form id="edit-form-{{ comment.id }}" method="post" action="{% url 'CBapp:edit_comment' comment.id %}" style="display:none;">
-                                                    {% csrf_token %}
-                                                    <textarea name="content" class="form-control">{{ comment.content }}</textarea>
-                                                    <button type="submit" class="btn btn-primary">Update Comment</button>
-                                                </form>
-                                            {% endif %}
-
-                                            {% if request.user == comment.user and is_staff %}
-                                                <!-- Edit and Delete buttons for admin only -->
-                                                <div class="comment-actions">
-                                                    <button onclick="showEditForm({{ comment.id }})" class="edit-button">Edit</button>
-                                                    <form id="edit-form-{{ comment.id }}" method="post" action="{% url 'CBapp:edit_comment' comment.id %}" style="display:none;">
-                                                        {% csrf_token %}
-                                                        <textarea name="content" class="form-control">{{ comment.content }}</textarea>
-                                                        <button type="submit" class="btn btn-primary">Update Comment</button>
-                                                    </form>
-                                                </div>
-                                            {% endif %}
-
-                                            {% if request.user.is_staff %}
-                                                <!-- Delete button for admin only -->
-                                                <button onclick="deleteComment('{{ comment.id }}')" class="delete-button">Delete</button>
-                                            {% endif %}
-
-                                            {% if request.user == comment.user and is_developer %}
-                                                <button onclick="deleteComment('{{ comment.id }}')" class="delete-button">Delete</button>
-                                            {% endif %}
-
-                                            <!-- Display replies -->
-                                            {% if comment.replies.all %}
-                                                <div class="replies" style="margin-left: 20px;">
-                                                    {% for reply in comment.replies.all %}
-                                                        <div class="reply">
-                                                            <strong>{{ reply.user.username }}</strong>: {{ reply.content }}
-                                                            <p><em>{{ reply.created_at }}</em></p>
-                                                            {% if user == reply.user %}
-                                                                <form action="{% url 'CBapp:delete_reply' reply.id %}" method="post" style="display:inline;">
-                                                                    {% csrf_token %}
-                                                                    <button type="submit" class="delete-button">Delete Reply</button>
-                                                                </form>
-                                                            {% endif %}
-                                                        </div>
-                                                    {% empty %}
-                                                        <p>No replies yet.</p>
-                                                    {% endfor %}
-                                                </div>
-                                            {% else %}
-                                                <p>No replies yet.</p>
-                                            {% endif %}
-
-                                            {% if user.is_staff %}
-                                                <!-- Reply input for admin only -->
-                                                <form action="{% url 'CBapp:add_comment_reply' comment.id %}" method="post" class="reply-input">
-                                                    {% csrf_token %}
-                                                    <textarea name="content" placeholder="Reply..." rows="2" class="form-control"></textarea>
-                                                    <button type="submit" class="btn btn-secondary">Reply</button>
-                                                </form>
-                                            {% endif %}
-                                        </div>
-                                    {% endfor %}
-                                </div>
-
-                                <!-- Add new comment -->
-                                <form method="post" action="{% url 'CBapp:codepage' %}">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="problem_id" value="{{ problem.id }}">
-                                    <textarea name="content" class="form-control" rows="3"></textarea>
-                                    <button type="submit" class="btn btn-secondary">Add Comment</button>
-                                </form>
-                            </div>
-                            <button onclick="toggleCard(event)" class="btn btn-primary">Show more</button>
-                        </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p>No code problems found.</p>
-            {% endif %}
-            <button onclick="location.href='/'" class="back-button">Back</button>
-        {% elif is_student %}
-            <h1 class="mb-4">Code Problems</h1>
-            <a class="btn btn-primary btn-lg mb-4" href="{% url 'CBapp:student_tutorials' %}" role="button">View Tutorials</a>
-            <form method="get" class="mb-4">
-                <div class="form-group">
-                    <label for="language">Filter by Language:</label>
-                    <input type="text" id="language" name="language" value="{{ form.language.value }}" class="form-control">
-                </div>
-                <button type="submit" class="btn btn-primary">Filter</button>
-            </form>
-            <div class="row">
-                {% if accepted_problems %}
-                    {% for problem in accepted_problems %}
                         <div class="col-md-4">
-                            <div class="card toggle-card">
-                               <h2><a href="{% url 'CBapp:problem_detail' problem.id %}">{{ problem.problem }}</a></h2>
-
-                                <div class="card-body toggle-card-body">
+                            <div class="toggle-card">
+                                <h2><a href="{% url 'CBapp:problem_detail' problem.id %}">{{ problem.problem }}</a></h2>
+                                <div class="code-problem toggle-card-body">
                                     <div class="code-block" id="description-{{ problem.id }}">
                                         {{ problem.description|safe }}
                                     </div>
@@ -312,7 +322,8 @@ h2 {
                                         {{ problem.solution|safe }}
                                     </div>
                                     <button class="show-more" onclick="toggleShowMore('solution-{{ problem.id }}', this)">Show more</button>
-                                    <p><strong>Language:</strong> {{ problem.language }}</p>
+                                    <button onclick="window.location.href='{% url 'CBapp:edit_solution' problem.id %}'" class="edit-button">Edit Solution</button>
+                                    <button onclick="deleteProblem('{{ problem.id }}')" class="delete-button">Delete</button>
 
                                     <!-- Display comments -->
                                     <div class="comments">
@@ -321,16 +332,38 @@ h2 {
                                             <div class="comment">
                                                 <strong>{{ comment.user.username }}</strong>: {{ comment.content }}
                                                 <p><em>{{ comment.created_at }}</em></p>
-                                                {% if comment.user == request.user %}
+                                                {% if request.user == comment.user and is_developer %}
                                                     <button onclick="showEditForm({{ comment.id }})" class="edit-button">Edit</button>
-                                                    <!-- Edit comment form (initially hidden) -->
+
+                                                    <!-- Edit form (initially hidden) -->
                                                     <form id="edit-form-{{ comment.id }}" method="post" action="{% url 'CBapp:edit_comment' comment.id %}" style="display:none;">
                                                         {% csrf_token %}
                                                         <textarea name="content" class="form-control">{{ comment.content }}</textarea>
                                                         <button type="submit" class="btn btn-primary">Update Comment</button>
                                                     </form>
+                                                {% endif %}
+
+                                                {% if request.user == comment.user and is_staff %}
+                                                    <!-- Edit and Delete buttons for admin only -->
+                                                    <div class="comment-actions">
+                                                        <button onclick="showEditForm({{ comment.id }})" class="edit-button">Edit</button>
+                                                        <form id="edit-form-{{ comment.id }}" method="post" action="{% url 'CBapp:edit_comment' comment.id %}" style="display:none;">
+                                                            {% csrf_token %}
+                                                            <textarea name="content" class="form-control">{{ comment.content }}</textarea>
+                                                            <button type="submit" class="btn btn-primary">Update Comment</button>
+                                                        </form>
+                                                    </div>
+                                                {% endif %}
+
+                                                {% if request.user.is_staff %}
+                                                    <!-- Delete button for admin only -->
                                                     <button onclick="deleteComment('{{ comment.id }}')" class="delete-button">Delete</button>
                                                 {% endif %}
+
+                                                {% if request.user == comment.user and is_developer %}
+                                                    <button onclick="deleteComment('{{ comment.id }}')" class="delete-button">Delete</button>
+                                                {% endif %}
+
                                                 <!-- Display replies -->
                                                 {% if comment.replies.all %}
                                                     <div class="replies" style="margin-left: 20px;">
@@ -373,19 +406,68 @@ h2 {
                                         <button type="submit" class="btn btn-secondary">Add Comment</button>
                                     </form>
                                 </div>
-                                    <button onclick="toggleCard(event)" class="btn btn-primary">Show more</button>
+                                <button onclick="toggleCard(event)" class="btn btn-primary">Show more</button>
                             </div>
                         </div>
                     {% endfor %}
-                {% else %}
-                    <p>No accepted problems found.</p>
-                {% endif %}
-            </div>
-        {% else %}
-            <h1>Unauthorized Access</h1>
-            <p>You are not authorized to access this page.</p>
+                </div>
+            {% else %}
+                <p>No code problems found.</p>
+            {% endif %}
+            <button onclick="location.href='/'" class="back-button">Back</button>
+        {% elif is_student %}
+            <h1>Coding Problems</h1>
+            <form method="get" class="mb-4">
+                <div class="form-group">
+                    <label for="language">Filter by Language:</label>
+                    <input type="text" id="language" name="language" value="{{ form.language.value }}" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </form>
+
+            <div class="row">
+                {% if accepted_problems %}
+                    {% for problem in accepted_problems %}
+                        <div class="parent">
+                                            <div class="card
+                            {% if problem.language == 'Python' %}
+                                card
+                            {% elif problem.language == 'Java' %}
+                                card2
+                            {% elif problem.language == 'C++' %}
+                                card3
+                            {% else %}
+                                card4
+                            {% endif %}
+                        ">
+                                <div class="date-box">
+                                    {% if problem.language == "Python" %}
+                                        <img src="{% static 'home/images/python_icon.png' %}" alt="Python">
+                                    {% elif problem.language == "Java" %}
+                                        <img src="{% static 'home/images/java_icon.png' %}" alt="Java">
+                                    {% elif problem.language == "C++" %}
+                                        <img src="{% static 'home/images/cpp_icon.png' %}" alt="C++">
+                                    {% endif %}
+                                </div>
+                                <div class="content-box">
+                                    <h1 class="card-title">{{ problem.problem }}</h1>
+                                    <p class="card-content">{{ problem.short_description|safe }}</p>
+                                    <p class="card-content">{{ problem.language|safe }}</p>
+                                    <a href="{% url 'CBapp:problem_detail' problem.id %}" class="see-more">See More</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>No code problems found.</p>
+            {% endif %}
         {% endif %}
     </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    {{ block.super }}
     <script>
         function toggleShowMore(id, button) {
             var codeBlock = document.getElementById(id);
@@ -451,23 +533,17 @@ h2 {
         }
 
         function toggleCard(e) {
-    const clickedElement = e.target;
+            const clickedElement = e.target;
+            const card = clickedElement.closest('.toggle-card');
+            const cardBody = card.querySelector('.toggle-card-body');
 
-    const card = clickedElement.closest('.toggle-card');
-
-    const cardBody = card.querySelector('.toggle-card-body');
-
-    if (cardBody.style.display === 'none' || cardBody.style.display === '') {
-        cardBody.style.display = 'block';
-        clickedElement.textContent = 'Show less';
-
-    } else {
-        cardBody.style.display = 'none';
-        clickedElement.textContent = 'Show more';
-
-    }
-}
-
-
+            if (cardBody.style.display === 'none' || cardBody.style.display === '') {
+                cardBody.style.display = 'block';
+                clickedElement.textContent = 'Show less';
+            } else {
+                cardBody.style.display = 'none';
+                clickedElement.textContent = 'Show more';
+            }
+        }
     </script>
 {% endblock %}
