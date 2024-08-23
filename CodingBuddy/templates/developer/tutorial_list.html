@@ -197,7 +197,7 @@
                 {% endfor %}
             </ul>
             <a class="add-tutorial" href="/developer/tutorials/add/">Add Tutorial</a>
-        {% elif is_student %}
+        {% else %}
             <h1>Tutorials</h1>
             <div class="filter-container">
                 <form method="get">
@@ -233,9 +233,7 @@
                 {% endfor %}
             </ul>
             <button onclick="location.href='/'" class="back-button">Back</button>
-        {% else %}
-            <h1>Unauthorized Access</h1>
-            <p>You are not authorized to access this page.</p>
+
         {% endif %}
     </div>
 {% endblock %}

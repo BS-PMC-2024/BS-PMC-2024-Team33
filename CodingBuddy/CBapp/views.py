@@ -166,14 +166,6 @@ def view_problems_for_student(request):
     return render(request, 'developer/codepage.html', {'accepted_problems': accepted_problems, 'form': form})
 
 
-@login_required
-def tutorial_list_developer(request):
-    user = request.user
-    is_developer = user.groups.filter(name='Developer').exists()
-    is_staff = user.is_staff
-    tutorials = Tutorial.objects.all()
-    context = {'is_developer': is_developer, 'is_staff': is_staff, 'tutorials': tutorials}
-    return render(request, 'developer/tutorial_list.html', context)
 
 
 @login_required
