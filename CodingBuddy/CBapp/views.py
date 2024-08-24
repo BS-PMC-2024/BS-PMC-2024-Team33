@@ -18,7 +18,7 @@ def aboutus(request):
     return render(request, 'aboutus.html')
 
 
-@require_http_methods(["POST"])
+@require_http_methods(["DELETE"])
 def delete_problem(request, problem_id):
     problem = get_object_or_404(CodeProblem, pk=problem_id)
     if request.user.is_authenticated and request.user.is_staff:
@@ -277,8 +277,8 @@ def add_comment_reply(request, comment_id):
 def delete_reply(request, reply_id):
     reply = get_object_or_404(CommentReply, id=reply_id)
 
-    # Check if the user is an admin and the owner of the reply
-    if request.user.is_staff and request.user == reply.user:
+    # Check if the user is an admin or the owner of the reply
+    if request.user.is_staff or request.user == reply.user:
         if request.method == 'POST':
             reply.delete()
             return redirect(request.META.get('HTTP_REFERER', '/'))
